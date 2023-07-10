@@ -36,16 +36,16 @@ This component implements local receiver and decoding hub that can be used both 
     beethowen_receiver:
       dump: unmatched
       devices:
-        - mac_address: 11:22:33:44:55:55
+        - mac_address: "11:22:33:44:55:55"
           name_prefix: Beethowen TestDevice
           expected_remote_passkey: 0x1234
           dump: all
-        - mac_address: AA:BB:CC:DD:EE:FF
+        - mac_address: "AA:BB:CC:DD:EE:FF"
           name_prefix: Beethowen ABCDEF TestDevice
 
     sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: temperature
             name: Temperature
@@ -59,7 +59,7 @@ This component implements local receiver and decoding hub that can be used both 
 
     binary_sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: generic_boolean
             name: D6_gpio
@@ -161,7 +161,7 @@ To initialize a sensor, first supply ``mac_address`` to identify the remote Beet
     # Individual sensors
     sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: temperature
             name: Temperature
