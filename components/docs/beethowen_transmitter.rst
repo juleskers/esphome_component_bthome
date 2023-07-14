@@ -135,7 +135,7 @@ Proposed scenario is as follows:
 Sensor
 ------
 
-The ``beethowen transmitter sensor`` allows you use a sensor to collect and transfer data to a remote 
+The ``beethowen transmitter sensor`` allows you to use sensors to collect and transfer data to a remote 
 Beethowen receiver hub and are listed below the hub.
 
 The beethowen sensor component acts as a proxy sensor that receives data from other pyhsical sensors.
@@ -163,7 +163,7 @@ Sensor Automation
 on_send_finished
 ~~~~~~~~~~~~~~~~
 This automation will be triggered when a transmission is finished though the beethowen channel.
-In Lambdas you can get the result and check if there are any outstanding measurements not yet transferred 
+In lambdas you can get the result and check if there are any outstanding measurements not yet transferred 
 with *has_outstanding_measurements*.
 
 on_send_failed
@@ -175,7 +175,7 @@ Actions
 
 send
 ~~~~
-This action collects all connected sensor data and sends them thorugh the beethowen channel.
+This action collects all connected sensor data and sends them through the beethowen channel.
 
 Configuration variables:
 ************************
