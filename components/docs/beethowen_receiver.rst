@@ -145,7 +145,7 @@ Sensor and Binary Sensor as *virtual device*
 
 The ``beethowen sensor`` allows you use a sensor to display received measurement from a remote 
 Beethowen device.
-First, you need to define a :ref:`beethowen hub component <beethowen-component>`.
+First, you need to define a :ref:`beethowen hub component<beethowen-component>`.
 
 The beethowen sensor component (or "device") is an internal model that acts as a central reception 
 and dispatcher hub for a specific remote device identified by a ``mac_address`` to which beethowen 
@@ -178,7 +178,7 @@ Configuration variables:
 
 - **mac_address** (**Required**, mac-address): The address of the sensor.
 
-- **sensors** (*Required*): List of remote sensor connected to this virtual device.
+- **sensors** (*Required*): List of remote sensors connected to this virtual device.
   
   - **name** (*Optional*): The name for the sensor. At least one of **id** and **name** must be specified.
 
