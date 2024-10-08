@@ -10,7 +10,9 @@
 #include <vector>
 #include <map>
 #include <string>
-
+#ifndef USE_ESP32
+#include <pgmspace.h>
+#endif
 
 #include "bthome_parser.h"
 #include "bthome_common_generated.h"
