@@ -3,6 +3,10 @@
 
 #pragma once
 
+#ifndef USE_ESP32
+#include <pgmspace.h>
+#endif
+
 
 namespace bthome_base
 {
@@ -97,7 +101,11 @@ typedef enum {
   BTHOME_DIMMER_ROTATE_RIGHT = 0x02
 } BTHome_Dimmer_e;
 
+#ifndef USE_ESP32
+static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */ 
+#else
 static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */ 
+#endif
   /* 0x00 */ 0b00000001, /* packet_id | uint8 (1 byte) | numeric * 1.0 */
   /* 0x01 */ 0b00000001, /* battery | uint8 (1 byte) | numeric * 1.0 */
   /* 0x02 */ 0b01001010, /* temperature | sint16 (2 bytes) | numeric * 0.01 */
