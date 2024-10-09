@@ -68,6 +68,19 @@ namespace bthome_base
     uint8_t obj_data_start;
     float obj_data_factor;
 
+    if (log_cb)
+    {               
+      std::string message0 = "receive BT payload is : ";
+      const int siz_ar = sizeof(payload_data) / sizeof(uint8_t);
+      for (int i = 0; i < siz_ar; ++i)
+       { 
+          message0.append(std::to_string(payload_data[i]));
+          message0.append("");
+       }
+       log_cb(message0.c_str());
+    }
+
+
     while (payload_length >= next_obj_start + 1)
     {
       auto obj_start = next_obj_start;
