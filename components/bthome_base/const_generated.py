@@ -445,7 +445,7 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
     "volume storage": {
         "measurement_type": 0x55,
         "accuracy_decimals": 3,
-        "unit_of_measurement": "l"
+        "unit_of_measurement": "l",
         "device_class": "volume"
     },
     "conductivity": {
@@ -456,13 +456,13 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
     "temperature": {
         "measurement_type": 0x57,
         "accuracy_decimals": 0,
-        "unit_of_measurement": "°C"
+        "unit_of_measurement": "°C",
         "device_class": "temperature"
     },
     "temperature": {
         "measurement_type": 0x58,
         "accuracy_decimals": 0,
-        "unit_of_measurement": "°C"
+        "unit_of_measurement": "°C",
         "device_class": "temperature"
     },
     "count": {
@@ -483,13 +483,13 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
     "power": {
         "measurement_type": 0x5c,
         "accuracy_decimals": 2,
-        "unit_of_measurement": "W"
+        "unit_of_measurement": "W",
         "device_class": "power"
     },
     "current": {
         "measurement_type": 0x5d,
         "accuracy_decimals": 3,
-        "unit_of_measurement": "A"
+        "unit_of_measurement": "A",
         "device_class": "current"
     }
 }
