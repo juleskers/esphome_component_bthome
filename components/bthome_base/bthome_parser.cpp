@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <cstring>
 #ifndef USE_ESP32
 #include <pgmspace.h>
 #endif
@@ -70,16 +71,18 @@ namespace bthome_base
 
     if (log_cb)
     {               
-      std::string message0 = "receive BT payload is : ";
-
+	  char buffer [4];
+	  char msg [70]; 
+      int n;
+	  strcpy(msg, "rec BT payload is : ");
       for (int i = 0; i < payload_length; ++i)
        { 
-          message0.append(std::to_string(payload_data[i]));
-          message0.append(" ");
+           n=sprintf (buffer, "%.2x ", payload_data[i]);
+		   strlcat(msg, buffer, sizeof(msg)); 
        }
-       log_cb(message0.c_str());
+	   log_cb(msg);
     }
-
+		
 
     while (payload_length >= next_obj_start + 1)
     {
