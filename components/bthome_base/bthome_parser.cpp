@@ -75,7 +75,7 @@ namespace bthome_base
       for (int i = 0; i < siz_ar; ++i)
        { 
           message0.append(std::to_string(payload_data[i]));
-          message0.append("");
+          message0.append(" ");
        }
        log_cb(message0.c_str());
     }
