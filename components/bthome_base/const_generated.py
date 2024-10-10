@@ -418,7 +418,7 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x4e,
         "accuracy_decimals": 3,
         "unit_of_measurement": "L",
-        "device_class": "volume"
+        "device_class": "power"
     },
     "water": {
         "measurement_type": 0x4f,
@@ -446,6 +446,7 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x55,
         "accuracy_decimals": 3,
         "unit_of_measurement": "l"
+        "device_class": "volume"
     },
     "conductivity": {
         "measurement_type": 0x56,
@@ -456,11 +457,13 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x57,
         "accuracy_decimals": 0,
         "unit_of_measurement": "°C"
+        "device_class": "temperature"
     },
     "temperature": {
         "measurement_type": 0x58,
         "accuracy_decimals": 0,
         "unit_of_measurement": "°C"
+        "device_class": "temperature"
     },
     "count": {
         "measurement_type": 0x59,
@@ -481,10 +484,12 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x5c,
         "accuracy_decimals": 2,
         "unit_of_measurement": "W"
+        "device_class": "power"
     },
     "current": {
         "measurement_type": 0x5d,
         "accuracy_decimals": 3,
         "unit_of_measurement": "A"
+        "device_class": "current"
     }
 }
