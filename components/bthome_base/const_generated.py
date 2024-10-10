@@ -418,7 +418,7 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x4e,
         "accuracy_decimals": 3,
         "unit_of_measurement": "L",
-        "device_class": "power"
+        "device_class": "volume"
     },
     "water": {
         "measurement_type": 0x4f,
