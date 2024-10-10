@@ -71,8 +71,8 @@ namespace bthome_base
     if (log_cb)
     {               
       std::string message0 = "receive BT payload is : ";
-      const int siz_ar = sizeof(payload_data) / sizeof(uint8_t);
-      for (int i = 0; i < siz_ar; ++i)
+
+      for (int i = 0; i < payload_length; ++i)
        { 
           message0.append(std::to_string(payload_data[i]));
           message0.append(" ");
