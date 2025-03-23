@@ -1,5 +1,7 @@
 Just a fork to run this project on a Shelly Plus 1. 
 
+the original README.md is blow this.....
+
 ***Deprecation warning***
 
 I have not been putting much effort to this project lately mainly due to the lack of possibility to easy integration with Home Assistant and also the tedious process of setting up sensors in both sides.
