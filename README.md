@@ -1,4 +1,4 @@
-Just a fort to run this project on a Shelly Plus 1. 
+Just a fork to run this project on a Shelly Plus 1. 
 
 ***Deprecation warning***
 
