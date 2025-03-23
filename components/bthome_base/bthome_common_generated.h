@@ -2,7 +2,7 @@
 /* auto generated, do not edit */
 
 #pragma once
-#include <pgmspace.h>
+//#include <pgmspace.h>
 
 namespace bthome_base
 {
