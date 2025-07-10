@@ -103,13 +103,13 @@ typedef enum {
 } BTHome_Dimmer_e;
 
 #ifndef USE_ESP32
-static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */ 
+static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
 #else
-static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */ 
+static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
 #endif
   /* 0x00 */ 0b00000001, /* packet_id | uint8 (1 byte) | numeric * 1.0 */
   /* 0x01 */ 0b00000001, /* battery | uint8 (1 byte) | numeric * 1.0 */
-  /* 0x02 */ 0b01001010, /* temperature | sint16 (2 bytes) | numeric * 0.01 */  
+  /* 0x02 */ 0b01001010, /* temperature | sint16 (2 bytes) | numeric * 0.01 */
   /* 0x03 */ 0b01000010, /* humidity | uint16 (2 bytes) | numeric * 0.01 */
   /* 0x04 */ 0b01000011, /* pressure | uint24 (3 bytes) | numeric * 0.01 */
   /* 0x05 */ 0b01000011, /* illuminance | uint24 (3 bytes) | numeric * 0.01 */
@@ -192,7 +192,7 @@ static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Facto
   /* 0x52 */ 0b01100010, /* gyroscope | uint16 (2 bytes) | numeric * 0.001 */
   /* 0x53 */ 0b00000000, /* text */
   /* 0x54 */ 0b00000000, /* raw */
-  /* 0x55 */ 0b01100100, /* volume storage | uint32 (4 bytes) | numeric * 0.001 */  
+  /* 0x55 */ 0b01100100, /* volume storage | uint32 (4 bytes) | numeric * 0.001 */
   /* 0x56 */ 0b00000010, /* conductivity | uint16 (2 bytes) | numeric * 1.0 */
   /* 0x57 */ 0b00001001, /* temperature | sint8 (1 byte) | numeric 1.0 */
   /* 0x58 */ 0b00001001, /* temperature | sint8 (1 btes) | numeric * 0.35 !!!!! */
