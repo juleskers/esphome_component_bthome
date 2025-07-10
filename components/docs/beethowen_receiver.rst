@@ -38,16 +38,16 @@ This component implements local receiver and decoding hub that can be used both 
     beethowen_receiver:
       dump: unmatched
       devices:
-        - mac_address: 11:22:33:44:55:55
+        - mac_address: "11:22:33:44:55:55"
           name_prefix: Beethowen TestDevice
           expected_remote_passkey: 0x1234
           dump: all
-        - mac_address: AA:BB:CC:DD:EE:FF
+        - mac_address: "AA:BB:CC:DD:EE:FF"
           name_prefix: Beethowen ABCDEF TestDevice
 
     sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: temperature
             name: Temperature
@@ -61,7 +61,7 @@ This component implements local receiver and decoding hub that can be used both 
 
     binary_sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: generic_boolean
             name: D6_gpio
@@ -73,7 +73,7 @@ Notes:
 - Home Assistant support is planned, yet not implemented yet. Passive BLE Monitor integration 
   can take RAW HCI packets, that provide an easy way to channel in this payload.
 
-.. _beethowen-component:
+.. _beethowen hub component:
 
 Component/Hub
 -------------
@@ -189,7 +189,7 @@ Sensor and Binary Sensor as *virtual device*
 
 The ``beethowen sensor`` allows you use a sensor to display received measurement from a remote 
 Beethowen device.
-First, you need to define a :ref:`beethowen hub component <beethowen-component>`.
+First, you need to define a :ref:`beethowen hub component`.
 
 The beethowen sensor component (or "device") is an internal model that acts as a central reception 
 and dispatcher hub for a specific remote device identified by a ``mac_address`` to which beethowen 
@@ -205,7 +205,7 @@ To initialize a sensor, first supply ``mac_address`` to identify the remote Beet
     # Individual sensors
     sensor:
       - platform: beethowen_receiver
-        mac_address: 11:22:33:44:55:55
+        mac_address: "11:22:33:44:55:55"
         sensors:
           - measurement_type: temperature
             name: Temperature
@@ -222,7 +222,7 @@ Configuration variables:
 
 - **mac_address** (**Required**, mac-address): The address of the sensor.
 
-- **sensors** (*Required*): List of remote sensor connected to this virtual device.
+- **sensors** (*Required*): List of remote sensors connected to this virtual device.
   
   - **name** (*Optional*): The name for the sensor. At least one of **id** and **name** must be specified.
 
