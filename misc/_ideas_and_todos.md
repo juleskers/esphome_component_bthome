@@ -1,34 +1,51 @@
 # IDEAs and TODOs
 
-- receiver: invalidate after x seconds  / add auto expiry somehow, sensor dows not support publishing "N/A" / has_value = false
+- receiver: invalidate after x seconds  / add auto expiry somehow, sensor does not support publishing "N/A" / has_value = false
 - add icons - as of now I do not understand how default icon by device_class is selected
 - add bthome BLE encryption
 - add ESP-NOW security - though flow is not trivial yet
 - Home Assistant parser integration / esp add beethowen "server" component option to proxy all incoming data to HA / with service to send data / proxy data to - problem:ESP32
-- add event -- source: should I add an action to simply "add" an event? | destination is unclear, should I just create a trigger / or auto-proxy an event to Home Asistant
-- add ACK / return value - addedd value is not clear
-- auto find mechanism finetuning // e.g. if not found for first iteration just skip measurement and sleep for 10 iterations / thus have an unsuccess counter before reconnect attempt
+- add event -- source: should I add an action to simply "add" an event? | destination is unclear, should I just create a trigger / or auto-proxy an event to Home Assistant
+- add ACK / return value - added value is not clear
+- auto find mechanism finetuning   
+  e.g. if not found for first iteration just skip measurement and sleep for 10 iterations  
+  thus have an unsuccess counter before reconnect attempt
 - transmitter: invalidate auto_send / per sensor
-- separate receiver / handlere with a semaphored queue + external thread
+- separate receiver / handler with a semaphored queue + external thread
 
 ----------------------------------------------------------------
 # Speedup the find server
 
+```
 WiFi.mode(WIFI_AP_STA);
-WiFi.softAP("temp", "temppass", channel, true, 0); // this introduces ~1800ms delay - known issue https://github.com/espressif/arduino-esp32/issues/6706
+WiFi.softAP("temp", "temppass", channel, true, 0); // this introduces ~1800ms delay
+``` 
+- known issue https://github.com/espressif/arduino-esp32/issues/6706  
+```
 [12:26:28][D][beethowen:049]: ..setupwifi 3 5206
 [12:26:30][D][beethowen:052]: ..setupwifi 4 7046
+```
 
 -----------
 # ESP-NOW security
 
 * one hub PMK - 16 bit private master key -- esp_now_set_pmk((uint8_t *)PMK_KEY_STR);
-* each device has LMK - If this key is not indicated, the action frame will not be encrypted
-  esp_now_peer_info_t slaveInfo;  memcpy(slaveInfo.peer_addr, slaveAddress, 6);  slaveInfo.channel = 0;  for (uint8_t i = 0; i < 16; i++) {    slaveInfo.lmk[i] = LMK_KEY_STR[i];  }  slaveInfo.encrypt = true;  if (esp_now_add_peer(&slaveInfo) != ESP_OK) {}
+* each device has LMK - If this key is not indicated, the action frame will not be encrypted  
+  ```
+  esp_now_peer_info_t slaveInfo;
+  memcpy(slaveInfo.peer_addr, slaveAddress, 6);
+  slaveInfo.channel = 0; 
+  for (uint8_t i = 0; i < 16; i++) {
+      slaveInfo.lmk[i] = LMK_KEY_STR[i];
+  }
+  slaveInfo.encrypt = true;
+  if (esp_now_add_peer(&slaveInfo) != ESP_OK) { ... }
 
-Note: The maximum number of peers which may be registered is 20 (espnow.MAX_TOTAL_PEER_NUM), with a maximum of 6 (espnow.MAX_ENCRYPT_PEER_NUM) of those peers with encryption enabled (see ESP_NOW_MAX_ENCRYPT_PEER_NUM in the Espressif API docs).
-ESPNow.del_peer(mac)
-// maybe can be set up to 17 -- CONFIG_ESP_WIFI_ESPNOW_MAX_ENCRYPT_NUM
+* Note: The maximum number of peers which may be registered is 20 (espnow.MAX_TOTAL_PEER_NUM),
+  * ... with a maximum of 6 of those peers with encryption enabled (espnow.MAX_ENCRYPT_PEER_NUM)  
+    (see ESP_NOW_MAX_ENCRYPT_PEER_NUM in the Espressif API docs).
+  * ESPNow.del_peer(mac)
+  * maybe can be set up to 17 -- CONFIG_ESP_WIFI_ESPNOW_MAX_ENCRYPT_NUM
 
 ```
 beethowen_transmitter:
@@ -64,7 +81,7 @@ Q:- does server receive a fuzzy message, but gets notified that MAC tries to rea
 * R: pong[unencrypted] # + R: add_peer
 * T: data[encrypted] # retry
 A: success -> happy path
-B: failure -> ?? can server assued to be lost ??
+B: failure -> ?? can server assumed to be lost ??
 
 ### scenario 2
 * T: find_server[encrypted] on ch1-11
@@ -77,7 +94,7 @@ A: if: has key for server -> add_peer
 * R: found_server[encrypted] on chX
 * T: data[encrypted] on chX
 
-B: else: doesnt have key for server
+B: else: doesn't have key for server
 XXX // if we want secure comm scenario this is not acceptable
 
 
@@ -95,13 +112,13 @@ XXX // if we want secure comm scenario this is not acceptable
 # OTA_SWITCH:
 /probably bad and irrelevant idea/
 
-- add OTA_SWITCH to communication channel
-  	```
-	ota::OTAComponent *ota_;
-	from esphome.components.ota import OTAComponent
-	this->get_ota()->set_safe_mode_pending(true);
-	
-	// Enqueue message as this is called from a high priority wifi thread, and documentation says not to spend too long in here...
+- add OTA_SWITCH to communication channel  
+    ```
+    ota::OTAComponent *ota_;
+    from esphome.components.ota import OTAComponent
+    this->get_ota()->set_safe_mode_pending(true);
+
+    // Enqueue message as this is called from a high priority wifi thread, and documentation says not to spend too long in here...
       proxy_message *message = (proxy_message *)malloc(sizeof(proxy_message));
 
       memcpy(message, incomingData, sizeof(proxy_message));
@@ -131,73 +148,71 @@ XXX // if we want secure comm scenario this is not acceptable
 
       proxy_base::ESPResultDecoder::check_esp_result_code(esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE), "WiFi.channel");
     }
-	```
+    ```
 
 - OTA remote from URL?
 - OTA remote mode with AP?
 - transmitter_sensor:
-	```
-	proxy_id: ?
-	
-		beethowen_receiver:
+  ```yaml
+  proxy_id: ?
 
-		sensor:
-		  - platform: beethowen_receiver
-			mac_address: 11:22:33:44:55:66
-			passkey: 0xABCD 						# only accept measurement with this key
-			name_prefix: Beethowen TestDevice
-			sensors:
-			  - measurement_type: temperature
-				name: Temperature
-		
-		############
+    beethowen_receiver:
 
-		ota:
+      sensor:
+      - platform: beethowen_receiver
+        mac_address: 11:22:33:44:55:66
+        passkey: 0xABCD  # only accept measurement with this key
+        name_prefix: Beethowen TestDevice
+        sensors:
+        - measurement_type: temperature
+          name: Temperature
 
-		beethowen_transmitter:
-			id: my_beethowen_transmitter
-			proxied_sensors:	# sensors and binary_sensors
-				- measurement_type: temperature
-				  sensor_id: bmp085_temperature_sensor ## "implement sensor holder"
-			auto_send: true 				# should check if all sensors have state // not outstanding reads then send it automatically
-			auto_deepsleep: true			# capture deepsleep and call on all sensors read / do a read and send if not done before sleep!
-			ota-ap:
-				ssid: "$systemName"
-				password: !secret wifi_password
-			persistent: true
-	```
+    ############
+
+    ota:
+
+    beethowen_transmitter:
+      id: my_beethowen_transmitter
+      proxied_sensors:        # sensors and binary_sensors
+        - measurement_type: temperature
+          sensor_id: bmp085_temperature_sensor ## "implement sensor holder"
+      auto_send: true         # should check if all sensors have state // not outstanding reads then send it automatically
+      auto_deepsleep: true    # capture deepsleep and call on all sensors read / do a read and send if not done before sleep!
+      ota-ap:
+        ssid: "$systemName"
+        password: !secret wifi_password
+      persistent: true
+  ```
 
 ----------------------------------------------------------------
 
 # COMMUNICATION:
 ```
-client->bcast:	0xD2FC, 0x01, 0xABCD 				== find server with passkey 0xABCD
-server->client:	0xD2FC, 0x02, 0xABCD, 0x0B 			== server found or channel 11
-//server->client:	0xD2FC, 0xFF, 0xABCD, 0x22 			== error code 0x22 // e.g. unexpected client key
+client->bcast:    0xD2FC, 0x01, 0xABCD                == find server with passkey 0xABCD
+server->client:   0xD2FC, 0x02, 0xABCD, 0x0B          == server found or channel 11
+//server->client: 0xD2FC, 0xFF, 0xABCD, 0x22          == error code 0x22 // e.g. unexpected client key
 
-//server->client:	0xD2FC, 0x03, 0xABCD 				== start local OTA with pre-configured AP
-//server->client:	0xD2FC, 0x03, 0xABCD, URL/nullterm 	== start local OTA with pre-configured AP
+//server->client: 0xD2FC, 0x03, 0xABCD                == start local OTA with pre-configured AP
+//server->client: 0xD2FC, 0x03, 0xABCD, URL/nullterm  == start local OTA with pre-configured AP
 
-client->server:	0xD2FC, 0x16, 0xABCD, 0x40, <BTHomeData> == data packet
+client->server:   0xD2FC, 0x16, 0xABCD, 0x40, <BTHomeData> == data packet
 
-//server->client:	0xD2FC, 0x00, 0xABCD				== request client system_info
-//client->server:	0xD2FC, 0x00, 0xABCD, 0x00 [system_version], 0x01 [v1], 0x01 [system_name], 0x10 [len=16], "beethowen_remote" == response system_info
+//server->client: 0xD2FC, 0x00,                        == request client system_info
+//client->server: 0xD2FC, 0x00, 0xABCD, 0x00 [system_version], 0x01 [v1], 0x01 [system_name], 0x10 [len=16], "beethowen_remote" == response system_info
 
-//check: can I extend sensor.SENSOR_SCHEMA model with a field e.g. beethowen_measurement_type: temperature + modify def to_code? --? probably not
+//check: can I extend sensor.SENSOR_SCHEMA model with a field?
+ e.g. beethowen_measurement_type: temperature + modify def to_code? --? probably not
 ```
 
 ----------------------------------------------------------------
 # Event handling
 
-decode:
-0x3A
-
-3A00 --> binary sensor 3A00
-3A01 --> binary sensor 3A01
-
-3C0103 --> ??? dimmer rotated left by 3
-
-3C0103 -->
+decode, among others:
+  - 0x3A
+  - 3A00 --> binary sensor 3A00
+  - 3A01 --> binary sensor 3A01
+  - 3C0103 --> ??? dimmer rotated left by 3
+  - 3C0103 -->
 
 beethowen_transmitter
 	id(my_beethowen_transmitter)
@@ -206,8 +221,8 @@ script
 	id(my_beethowen_transmitter)->send_event(0x01, 0x03)
 
 
-```
-beethowen_receiver
+```yaml
+beethowen_receiver:
 	devices:
 		- mac: aa:bb:cc:dd:ee:ff
 		  on_dimmer_event: (subtype, value)
@@ -244,8 +259,8 @@ action:
 	- beethowen_transmitter.event: dimmer_rotate_left
 		steps: 3
 	- beethowen_transmitter.event: dimmer
-    	event_type: rotate_left
-    	steps: 3
+		event_type: rotate_left
+		steps: 3
 
 vector on events to transmit
 remove only upon successful delivery
