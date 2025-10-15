@@ -306,7 +306,7 @@ class Generator:
                 cv.GenerateID(CONF_BTHomeReceiverBaseDevice_ID): cv.declare_id(
                     self.device_class_factory()
                 ),
-                cv.Required(CONF_MAC_ADDRESS): cv.mac_address,
+                cv.Required(CONF_MAC_ADDRESS): cv.templatable(cv.mac_address),
                 cv.Required(CONF_SENSORS): cv.All(
                     cv.ensure_list(
                         self.sensor_schema_subsensor_factory(

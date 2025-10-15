@@ -70,19 +70,19 @@ namespace bthome_base
     float obj_data_factor;
 
     if (log_cb)
-    {               
+    {
 	  char buffer [4];
-	  char msg [70]; 
+	  char msg [70];
       int n;
 	  strcpy(msg, "rec BT payload is : ");
       for (int i = 0; i < payload_length; ++i)
-       { 
+       {
            n=sprintf (buffer, "%.2x ", payload_data[i]);
-		   strlcat(msg, buffer, sizeof(msg)); 
+		   strlcat(msg, buffer, sizeof(msg));
        }
 	   log_cb(msg);
     }
-		
+
 
     while (payload_length >= next_obj_start + 1)
     {
