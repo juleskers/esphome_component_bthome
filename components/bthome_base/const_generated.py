@@ -231,7 +231,7 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
     "illuminance": {
         "measurement_type": 0x05,
         "accuracy_decimals": 2,
-        "unit_of_measurement": "lux",
+        "unit_of_measurement": "lx",
         "device_class": "illuminance"
     },
     "mass_kg": {
