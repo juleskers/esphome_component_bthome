@@ -4,7 +4,8 @@ The original [afarago upstream](https://github.com/afarago/esphome_component_bth
 Since then, several forks have made various minor tweaks to the codebase.
 This repo represents a review of all those (public) forks, and attempts to provide a new unified starting point.
 
-I've reviewed and merged the entire public fork network of afarago's work: 7 forks with changes, not counting my own.
+I've reviewed and merged the entire public fork network of afarago's work, as of 2025-08-19:  
+7 forks with changes, not counting my own.
 - [afarago/master](https://github.com/afarago/esphome_component_bthome) @ [2da6aff87b](https://github.com/afarago/esphome_component_bthome/tree/2da6aff87b7b6c0d2321ae7f6d6bd799bbb7f592) (starting point)
 - [t0urista/master](https://github.com/t0urista/esphome_component_bthome) @ [fb9d9f24fb](https://github.com/t0urista/esphome_component_bthome/tree/fb9d9f24fbe901a301b21e5631a58bba9cf4187b)
   - == open PR: [afarago#20](https://github.com/afarago/esphome_component_bthome/pull/20)
@@ -26,7 +27,7 @@ I've reviewed and merged the entire public fork network of afarago's work: 7 for
 - [ChuckMorrisGit/master](https://github.com/ChuckMorrisGit/esphome_component_bthome) @ [95e8b8e6bd](https://github.com/ChuckMorrisGit/esphome_component_bthome/tree/95e8b8e6bdbea7a17b1fab76cb241a0346f649a4)
   - esp-idf compat by removing (not-ifdef'inf) pgmspace; conflict resolved in favour of ifdef
   - additional event type: button-hold
-  - many additional measurement types (small conflict in embedded non-breaking-spaces vs normal spaces)
+  - many additional measurement types (small conflict in embedded non-breaking-spaces vs normal spaces, kept NBSP)
   - same fixed init of bthome_measurement_record_t as digaus
 
 
@@ -76,6 +77,12 @@ The installation procedure for external components is described [here](https://e
     for low energy smart devices.
 
     See also: [BTHome protocol](https://bthome.io/) over [ESP-NOW communication protocol](https://www.espressif.com/en/solutions/low-power-solutions/esp-now)
+
+## Internal modules
+
+- **[beethowen_base]()**
+- bthome_base
+- bthome_receiver_base
 
 ## Overview
 ![Overview](components/docs/bthome_and_beethowen.drawio.png) 

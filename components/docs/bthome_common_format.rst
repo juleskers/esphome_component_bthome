@@ -29,8 +29,14 @@ Most interesting case is (`volume`, `volume_precise`, `volume_mL`).
 Multiple sensors of same type
 -----------------------------
 
-Multiple sensors of same type is supported by the specification, however at that point order or sensors plays an important role.
-Both transmitter and receiver should list the sensors in the correct order. Transmitter should send packages with all sensors completed.
+Multiple sensors of same type is supported by the specification, however at that point order of sensors plays an important role.
+
+Both transmitter and receiver should list the sensors in the correct order: by object_id, ascending.
+
+Transmitters must always send packages with all sensors completed, thus:
+Every packet must contain a value for each object, no skipping.
+If a property/event occurs more than once (e.g. multiple "0x02 temperature" or multiple "0x3a button"),
+their ordering must be identical from one packet to the next, so that receivers can properly keep track which is which.
 
 List of Measurement Types
 -------------------------

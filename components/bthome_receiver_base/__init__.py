@@ -389,7 +389,7 @@ class Generator:
                 for i in range(len(config_sensors_arr) - 1)
             ):
                 _LOGGER.warning(
-                    "Warning: Receiver sensors array not in increasing order, rearranging automatically. Consder rearranging them in config manually."
+                    "Warning: Receiver sensors array not in increasing order, rearranging automatically. Consider rearranging them in config manually."
                 )
                 # bubble sort sensors, stable sort, order on same ones are kept
                 swapped = True
