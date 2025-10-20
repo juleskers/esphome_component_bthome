@@ -26,7 +26,7 @@ This component implements local receiver and decoding hub that can be used both 
 
     # Example configuration entry
     external_components:
-      - source: github://afarago/esphome_component_bthome
+      - source: github://juleskers/esphome_component_bthome
 
     wifi:
       ssid: !secret wifi_ssid

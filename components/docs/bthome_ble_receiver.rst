@@ -15,7 +15,7 @@ Encryption support might be implemented later on.
 
     # Example configuration entry
     external_components:
-      - source: github://afarago/esphome_component_bthome
+      - source: github://juleskers/esphome_component_bthome
     
     esp32_ble_tracker:
 

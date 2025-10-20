@@ -19,7 +19,7 @@ esphome:
     - component.update: my_bmp085
 
 external_components:
-  - source: github://afarago/esphome_component_bthome
+  - source: github://juleskers/esphome_component_bthome
     refresh: 1min
 
 esp8266:

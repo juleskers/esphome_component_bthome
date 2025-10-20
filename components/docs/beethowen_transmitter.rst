@@ -23,7 +23,7 @@ This component implements local trasmitter and encoding hub that can be used bot
 
     # Example configuration entry
     external_components:
-      - source: github://afarago/esphome_component_bthome
+      - source: github://juleskers/esphome_component_bthome
     
     esphome:
       name: $systemName
