@@ -175,6 +175,11 @@ MEASUREMENT_TYPES_EVENT_SENSOR = {
         "measurement_type": 0x3a,
         "event_id": 6
     },
+    "button_hold_click": {
+        "device_event_type": 0x3a80,
+        "measurement_type": 0x3a,
+        "event_id": 128
+    },
     "dimmer_none": {
         "device_event_type": 0x3c00,
         "measurement_type": 0x3c,
