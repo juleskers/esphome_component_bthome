@@ -1,3 +1,8 @@
+"""
+Parses the BT home specification tables from www.bthome.io/format into usable config for this project.
+"""
+
+
 import urllib.request
 import ssl
 from bs4 import BeautifulSoup
@@ -31,29 +36,48 @@ ssl._create_default_https_context = ssl._create_unverified_context
 page = urllib.request.urlopen("http://bthome.io/format/")
 page_content = page.read()
 TARGET_DIR = "../components/"
-TARGET_BTHOMEBASE_DIR = TARGET_DIR + "/bthome_base/"
-TARGET_DOC_DIR = TARGET_DIR + "/docs/"
+TARGET_BTHOMEBASE_DIR = TARGET_DIR + "bthome_base/"
+TARGET_DOC_DIR = TARGET_DIR + "docs/"
 
 soup = BeautifulSoup(page_content, "html.parser")
 tables = soup.find_all("table")
 
-main_types = [
-    "numeric",  # Object id	Property	Data type	Factor	Example	Result	Unit
-    "binary",  # Object id	Property	Data type
-    "event",  # Object id	Device type	Event id	Event type	Event property
-    "numeric",  # Object id	Property	Data Type
-]  # main types in sections within bthome.io/format page
+
+# Main types in sections within bthome.io/format page;
+# - Ordering here hardcoded to the order they appear on that page.
+# - String entry determines the esphome device-type the table-contents are appended to.
+# - Set an entry to None to skip a table
+main_types = [  # Column headers:
+    # Spec header "Sensor Data"
+    "numeric",  # Object id; Property; Data type; Factor; Example; Result; Unit
+
+    # Spec header "Binary Sensor data"
+    "binary",   # Object id; Property; Data type; Example; Result
+
+    # Spec header "Events"
+    "event",    # Object id; Device type; Event id; Event type; Event property; Example; Result
+
+    # Spec header "Device information"; append to numeric
+    "numeric",  # Object id; Property; Data Type
+
+    # Spec header "Misc data"; append to numeric
+    # only "packet id" at time of writing
+    "numeric",  # Object id; Property; Data Type; Example; Result
+]
 
 data = []
-for imain in range(4):
-    main_type = main_types[imain]
-    # skip events for now
-    if not main_type:
+for imain, main_type in enumerate(main_types):
+    if not main_type:  # set entry in main_types to `None` to skip a table
         continue
 
     table = tables[imain].find("tbody")
+
+    # Some rows in spec-tables "repeat" previous values by leaving a cell empty.
+    # Cache the previous row, so we can re-use the previous entry.
     lastrow = []
-    for row in table.findAll("tr"):
+
+    for row in table.find_all("tr"):
+        # defaults, in case table row doesn't specify any
         factor = 1
         unit_of_measurement = None
         sensor_data = {}
@@ -70,11 +94,12 @@ for imain in range(4):
             data_type_length = 1
             try:
                 data_type_length = int(
-                    re.search("\((\d+)", data_type).group(1))
+                    re.search(r"\((\d+)", data_type).group(1))
             except:
                 pass
         elif main_type == "event":
-            if object_id_raw == "":  # not the first row - object_id is empty
+            if object_id_raw == "":  # object_id is empty for subsequent event-id rows inside an object-id
+                # re-use previous object-id
                 object_id_raw = row[0] = lastrow[0]
                 property = row[1] = lastrow[1]
             device_type = property
@@ -83,9 +108,10 @@ for imain in range(4):
             property_unique = f"{property}_{event_type}"
             unit_of_measurement = row[4].replace("#", "").replace(" ", "")
 
-            example_len = (int)(len(row[5].strip()) / 2)
+            # calculate data_type length from hex-example string-length: 2-hexchar = 1 byte
+            example_len = int(len(row[5].strip()) / 2)
             data_type_length = example_len - 1
-            data_type = f"uint8 ({data_type_length} byte)"
+            data_type = f"uint8 ({data_type_length} byte)"
 
             data_type_signed = False
 
@@ -119,6 +145,12 @@ for imain in range(4):
                 pass
             try:
                 unit_of_measurement = row[6]
+
+                # spec bug: Spec lists "lux" unit, but proper SI symbol as expected by Home Assistant is "lx".
+                # spec-fix proposed in https://github.com/home-assistant/bthome.io/pull/66
+                # until then:
+                if unit_of_measurement == "lux":
+                    unit_of_measurement = "lx"
             except:
                 pass
         accuracy_decimals = int(abs(math.log10(factor)))
@@ -145,7 +177,8 @@ for imain in range(4):
             "device_class": helpers.find_matching_device_class(
                 object_id, property, main_type
             ),
-            # "icon": helpers.find_matching_icon(object_id, property, main_type) # NOTE: check and understand how and which default icon is assigned in home assistant
+            # NOTE: check and understand how and which default icon is assigned in home assistant
+            # "icon": helpers.find_matching_icon(object_id, property, main_type)
         })
 
         data.append(sensor_data)
@@ -156,7 +189,8 @@ for imain in range(4):
 data = sorted(data, key=lambda x: helpers.msb(x["measurement_type"]))
 
 #
-# Duplicates: find and rename duplicates
+# Duplicates: find and rename duplicate property names,
+# to ensure non-ambiguous keys for config files.
 #
 
 differentiator_dictionary = {
@@ -173,13 +207,14 @@ for index, item in enumerate(data):
     # find all alike item indexes
     alike_list = [
         item
-        for (index, item) in enumerate(data)
+        for (_, item) in enumerate(data)
         if item["property_unique"] == property_key
         and item["main_type"] == main_type_key
     ]
-    if len(alike_list) > 1:
+    if len(alike_list) > 1:  # duplicates exist
         # print(">>>", property_key)
-        # find smallest one and mark as default
+        # Find lowest-hex-id and mark as default
+        # This works because hex-ids are assigned sequentially, so lower ones are older.
         min_measurement_type_index, _ = min(
             [(index, item["measurement_type"])
              for index, item in enumerate(alike_list)]
@@ -188,7 +223,7 @@ for index, item in enumerate(data):
         alike_list[min_measurement_type_index]["default"] = True
 
         # rename all based on data_type_length
-        # first - find dimenstions in which they differ
+        # first - find dimensions in which they differ
         value_matrix = []
         differentiator_matrix = [[]
                                  for _ in range(len(differentiator_candidates))]
@@ -219,7 +254,8 @@ for index, item in enumerate(data):
                     continue
 
                 # ###
-                # if there is only one value with a single occurence and this is the one - use this differentiator for this one, skip others
+                # if there is only one value with a single occurrence and this is the one:
+                # use this differentiator for this one, skip others
                 value = item[differentiator]
 
                 def group_list(lst):
@@ -240,7 +276,7 @@ for index, item in enumerate(data):
                     continue
 
                 # ###
-                # accuracy_decimal: default/first elem should not get extension, yet others should receive coarse/precise
+                # accuracy_decimal: default/first elem should not get extension, others should receive coarse/precise
                 # min_value = min([item["measurement_type"]
                 #                 for item in alike_list])
                 # if min_value == item["measurement_type"]:
@@ -320,7 +356,11 @@ def create_bthome_common_generated(data):
 /* auto generated, do not edit */
 
 #pragma once
+
+#ifndef USE_ESP32
 #include <pgmspace.h>
+#endif
+
 
 namespace bthome_base
 {
@@ -354,7 +394,7 @@ namespace bthome_base
                     event_subvalues[device_type] = []
 
                 event_subvalues[device_type].append(
-                    f'  BTHOME_{device_type.upper()}_{event_type.replace(" ","_").upper()} = {value2}'
+                    f'  BTHOME_{device_type.upper()}_{event_type.replace(" ", "_").upper()} = {value2}'
                 )
 
                 if not event_first:
@@ -401,7 +441,7 @@ namespace bthome_base
                              if item else 0), "08b")
                     + ', /* '
                     + (f'{item["property_unique"]} | {item["data_type"]} | {item["main_type"]}' +
-                       (f' * {math.pow(10,-int(item["accuracy_decimals"]))}' if item["main_type"]
+                       (f' * {math.pow(10, -int(item["accuracy_decimals"]))}' if item["main_type"]
                         == "numeric" else "")
                        if item else 'unused')
                     + ' */'
@@ -409,11 +449,16 @@ namespace bthome_base
 
             values.append(elem)
         names = "\n".join(values)
-        return (
-            "static const uint8_t PROGMEM MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */ \n"
-            + names
-            + "\n};\n"
-        )
+        return ("""\
+#ifndef USE_ESP32
+static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+#else
+static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+#endif
+"""
+                + names
+                + "\n};\n"
+                )
 
     data1 = generate_decoder_array(data)
     f.write(data1)
@@ -440,13 +485,13 @@ def create_const_generated(data):
         values = {}
         for item in data:
             if item["main_type"] == main_type:
-                if (main_type != "event"):
+                if main_type != "event":
                     convitem = {"measurement_type": item["measurement_type"]}
-                    if item["accuracy_decimals"] != None:
+                    if item["accuracy_decimals"] is not None:
                         convitem["accuracy_decimals"] = item["accuracy_decimals"]
-                    if item["unit_of_measurement"] != None:
+                    if item["unit_of_measurement"] is not None:
                         convitem["unit_of_measurement"] = item["unit_of_measurement"]
-                    if item["device_class"] != None:
+                    if item["device_class"] is not None:
                         convitem["device_class"] = item["device_class"]
                     # if item["icon"] != None: # NOTE: check and understand how and which default icon is assigned in home assistant
                     #     convitem["icon"] = item["icon"]
@@ -456,7 +501,7 @@ def create_const_generated(data):
                         "measurement_type": item["measurement_type"],
                         "event_id": item["event_id"]
                     }
-                    if (item["data_type_length"] > 1):
+                    if item["data_type_length"] > 1:
                         convitem["has_value"] = True
 
                     # TODO: python serialize to python - not json
@@ -465,9 +510,9 @@ def create_const_generated(data):
                 values[item["property_unique"]] = convitem
 
         retval = json.dumps(values, indent=4, ensure_ascii=False)
-        retval = re.sub('(?<=\"measurement_type\": )(\d+)',
+        retval = re.sub(r'(?<=\"measurement_type\": )(\d+)',
                         lambda i: helpers.hex2(int(i.group(1)), 2), retval)
-        retval = re.sub('(?<=\"device_event_type\": )(\d+)',
+        retval = re.sub(r'(?<=\"device_event_type\": )(\d+)',
                         lambda i: hex(int(i.group(1))), retval)
         # retval = re.sub(
         #     '(?<=: )(\d+)', lambda i: f"0x{int(i.group(0)):02x}", retval
@@ -504,7 +549,7 @@ def dump_types_for_doc(data):
     col_sep_char = " "
 
     def gen_header(achar, asepchar, data_columns):
-        return asepchar.join([achar*(col_length)]*(len(data_columns))) + "\n"
+        return asepchar.join([achar * col_length] * (len(data_columns))) + "\n"
 
     fname = TARGET_DOC_DIR + "bthome_common_format_generated.rst"
     print(f"generating {fname}...")
