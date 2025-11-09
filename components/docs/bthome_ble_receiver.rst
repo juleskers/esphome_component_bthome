@@ -1,9 +1,9 @@
 ESP32 BTHome Receiver
 =====================
 
-**BTHome** is an energy efficient but flexible BLE (Bluetooth Low Energy) format for devices to 
+**BTHome** is an energy efficient but flexible BLE (Bluetooth Low Energy) format for devices to
 broadcast their sensor data and  button presses. Devices can run over a year on a single battery.
-It allows data encryption and is supported by popular home automation platforms, 
+It allows data encryption and is supported by popular home automation platforms,
 like `Home Assistant <https://www.home-assistant.io>`__, out of the box.
 
 This component implements local reception and decoding without the need of a central hub.
@@ -16,7 +16,7 @@ Encryption support might be implemented later on.
     # Example configuration entry
     external_components:
       - source: github://juleskers/esphome_component_bthome
-    
+
     esp32_ble_tracker:
 
     bthome_ble_receiver:
@@ -62,10 +62,10 @@ Component/Hub
 The ``bthome_ble_receiver`` component creates a global hub so that you can track bluetooth low
 energy devices using your ESP32 node over the BTHome protocol using both v1 and v2 protocols.
 
-The component depends on the ``esp32_ble_tracker`` component which needs to be added to the 
+The component depends on the ``esp32_ble_tracker`` component which needs to be added to the
 configuration.
 
-The bthome receiver component is an internal model that acts as a central reception 
+The bthome receiver component is an internal model that acts as a central reception
 and dispatcher hub to which bthome virtual devices and sensors are connected to.
 
 .. _config-bthome:
@@ -73,9 +73,9 @@ and dispatcher hub to which bthome virtual devices and sensors are connected to.
 Configuration variables:
 ************************
 
-- **dump** (*Optional*): Decode and dumpincoming remote readings codes in the logs 
+- **dump** (*Optional*): Decode and dumpincoming remote readings codes in the logs
   (at log.level=DEBUG) for any device.
-  
+
   - **all**: Decode and dump all readings.
   - **unmatched**: Decode and dump readings that are not mapped in configuration.
   - **none**: (default) Decode but do not dump any readings.
@@ -88,21 +88,22 @@ Configuration variables:
 
   - **name_prefix** (*Optional*): Device name to append before any sensor name as a prefix.
 
-  - **dump** (*Optional*): Decode and dump incoming remote readings codes in the logs 
+  - **dump** (*Optional*): Decode and dump incoming remote readings codes in the logs
     (at log.level=DEBUG) for this device.
 
+  - **encryption_key** (*Optional*): Encryption key for the device.
 
 .. _bthome-sensor:
 
 Sensor and Binary Sensor as *virtual device*
 --------------------------------------------
 
-The bthome sensor allows you use a sensor to display received measurement from a remote 
+The bthome sensor allows you use a sensor to display received measurement from a remote
 BTHome device.
 First, you need to define a :ref:`bthome hub component <bthome-component>`.
 
-The bthome sensor component (or "device") is an internal model that acts as a central reception 
-and dispatcher hub for a specific remote device identified by a ``mac_address`` to which bthome 
+The bthome sensor component (or "device") is an internal model that acts as a central reception
+and dispatcher hub for a specific remote device identified by a ``mac_address`` to which bthome
 sensors are connected to.
 
 To initialize a sensor, first supply ``mac_address`` to identify the remote BTHome device.
@@ -135,14 +136,14 @@ Configuration variables:
 - **mac_address** (**Required**, mac-address): The address of the sensor.
 
 - **sensors** (*Required*): List of remote sensor connected to this virtual device.
-  
+
   - **name** (*Optional*): The name for the sensor. At least one of **id** and **name** must be specified.
 
-  - **measurement_type** (*Required*, int **or** string): Measurement type as defined in 
-    `BTHome format specification <https://bthome.io/format>`__ either as a string or a numeric value. 
-    If selected by name (string) the accuracy and unit of measurement are automatically defaulted to the 
+  - **measurement_type** (*Required*, int **or** string): Measurement type as defined in
+    `BTHome format specification <https://bthome.io/format>`__ either as a string or a numeric value.
+    If selected by name (string) the accuracy and unit of measurement are automatically defaulted to the
     correct values.
-    
+
     Measurement type `further details <bthome_common_format.rst>`__ to be taken into account.
 
 See Also

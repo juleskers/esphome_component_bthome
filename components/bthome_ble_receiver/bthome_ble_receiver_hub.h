@@ -29,9 +29,24 @@ namespace esphome
     protected:
       bthome_base::BTProtoVersion_e parse_header_(const esp32_ble_tracker::ServiceData &service_data);
       bool parse_message_payload_(const esp32_ble_tracker::ServiceData &service_data, const esp32_ble_tracker::ESPBTDevice &device, bthome_base::BTProtoVersion_e proto);
+      bool decrypt_message_payload_(std::vector<uint8_t> &raw, const uint8_t *bindkey, const uint64_t &address);
     };
 
   }
 }
+
+struct BTHomeAESVector {
+  uint8_t key[16];
+  uint8_t plaintext[16];
+  uint8_t ciphertext[16];
+  uint8_t authdata[16];
+  uint8_t iv[16];
+  uint8_t tag[16];
+  size_t keysize;
+  size_t authsize;
+  size_t datasize;
+  size_t tagsize;
+  size_t ivsize;
+};
 
 #endif
