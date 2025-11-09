@@ -450,10 +450,13 @@ namespace bthome_base
             values.append(elem)
         names = "\n".join(values)
         return ("""\
+// MEAS_TYPES_FLAGS: Array of compressed settings bits for each Measurement Type;
+// Array index defined by measurement-type Object id.
+// Bit legend: 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen
 #ifndef USE_ESP32
-static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+static const uint8_t PROGMEM MEAS_TYPES_FLAGS[] = {
 #else
-static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+static const uint8_t         MEAS_TYPES_FLAGS[] = {
 #endif
 """
                 + names

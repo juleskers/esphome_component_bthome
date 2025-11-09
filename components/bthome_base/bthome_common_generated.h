@@ -102,10 +102,13 @@ typedef enum {
   BTHOME_DIMMER_ROTATE_RIGHT = 0x02
 } BTHome_Dimmer_e;
 
+// MEAS_TYPES_FLAGS: Array of compressed settings bits for each Measurement Type;
+// Array index defined by measurement-type Object id.
+// Bit legend: 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen
 #ifndef USE_ESP32
-static const uint8_t PROGMEM  MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+static const uint8_t PROGMEM MEAS_TYPES_FLAGS[] = {
 #else
-static const uint8_t MEAS_TYPES_FLAGS[] = { /* 8th bit Unused | 6-7th bits Factor | 4-5th bits DataType | 1-2-3rd bits DataLen */
+static const uint8_t         MEAS_TYPES_FLAGS[] = {
 #endif
   /* 0x00 */ 0b00000001, /* packet_id | uint8 (1 byte) | numeric * 1.0 */
   /* 0x01 */ 0b00000001, /* battery | uint8 (1 byte) | numeric * 1.0 */
