@@ -60,17 +60,19 @@ namespace bthome_base
   bool parse_payload_bthome(const uint8_t *payload_data, uint32_t payload_length, BTProtoVersion_e proto,
                             measurement_cb_fn_t measurement_cb, log_cb_fn_t log_cb)
   {
-    uint8_t next_obj_start = 0;
-    uint8_t prev_obj_meas_type = 0;
-    uint8_t obj_meas_type;
-    uint8_t obj_control_byte;
-    uint8_t obj_data_length;
-    HaBleTypes_e obj_data_format;
+    uint8_t next_obj_start = 0;         // pointer inside data array
+    uint8_t prev_obj_meas_type = 0;     // Keep track of measurement types, to verify that ascending order is maintained; as per spec
+    uint8_t obj_meas_type;              // Measurement Type; what is the sensor value representing?
+    uint8_t obj_meas_type_index = 1;    // for repeated occurrences of the same measurement type: which repeat is this?
+    uint8_t obj_control_byte;           // deprecated: used in deprecated BTHomeV1 protocol;
+    uint8_t obj_data_length;            // How many bytes to consume for this measurement type?
+    HaBleTypes_e obj_data_format;       // How to interpret the data-bytes? (uint? sint? 8, 16, 32 bits?)
     uint8_t obj_data_start;
-    float obj_data_factor;
+    float obj_data_factor;              // Data multiplier / scaling factor associated with this measurement type
 
     if (log_cb)
     {
+      // debug log full binary payload
       char buffer [4];
       char msg [70];
       int n;
@@ -84,10 +86,12 @@ namespace bthome_base
     }
 
 
+    // Iterate payload buffer until all fields are processed.
     while (payload_length >= next_obj_start + 1)
     {
       auto obj_start = next_obj_start;
 
+      // Derive this item´s size from protocol version
       if (proto == BTProtoVersion_BTHomeV1)
       {
         // BTHome V1
@@ -104,7 +108,7 @@ namespace bthome_base
         if (prev_obj_meas_type > obj_meas_type)
         {
           if (log_cb)
-            log_cb("BTHome device is not sending object ids in numerical order (from low to high object id).");
+            log_cb("BTHome device is not sending object ids in required ascending order (from low to high object id).");
         }
 
         prev_obj_meas_type = obj_meas_type;
@@ -121,17 +125,21 @@ namespace bthome_base
         return false;
       }
 
+      // Given protocol version: parse data fields
+
+      // sanity check: do we have parsing info for this measurement type?
       if (obj_meas_type >= sizeof(MEAS_TYPES_FLAGS) / sizeof(uint8_t))
       {
         if (log_cb)
         {
-          std::string message = "Invalid Object ID found in payload - ";
+          std::string message = "Object ID from the future found in payload, please regenerate constants for parsing code - ";
           message.append(std::to_string(obj_meas_type));
           log_cb(message.c_str());
         }
-        break;
+        break; // stop parsing, all subsequent IDs will also be higher than what we know how to handle.
       }
 
+      // parsing instructions for this measurement-type
       BTHomeDataFormat dataformat = getDataFormat(obj_meas_type);
       obj_data_length = dataformat.len_in_bytes;
       obj_data_format = dataformat.data_format;
@@ -146,9 +154,10 @@ namespace bthome_base
       }
       if (payload_length < next_obj_start)
       {
+        // buffer overflow: reading this data field would take us beyond payload data.
         if (log_cb)
-          log_cb("Invalid payload data length.");
-        break;
+          log_cb("Invalid payload data length: ran into payload end while expecting more data.");
+        break; // stop parsing, but don't consider earlier fields failed.
       }
 
       const uint8_t obj_value_data_length = obj_data_length;
@@ -163,7 +172,7 @@ namespace bthome_base
       {
         if (log_cb)
         {
-          std::string message = "Invalid payload data type - ";
+          std::string message = "Unknown payload data type - ";
           message.append(std::to_string(obj_data_format));
           log_cb(message.c_str());
         }
