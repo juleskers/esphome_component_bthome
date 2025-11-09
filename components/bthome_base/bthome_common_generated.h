@@ -82,7 +82,16 @@ typedef enum {
   BTHOME_WATER_VALUE = 0x4f, 
   BTHOME_TIMESTAMP_VALUE = 0x50, 
   BTHOME_ACCELERATION_VALUE = 0x51, 
-  BTHOME_GYROSCOPE_VALUE = 0x52
+  BTHOME_GYROSCOPE_VALUE = 0x52, 
+  BTHOME_TEXT_VALUE = 0x53, 
+  BTHOME_RAW_VALUE = 0x54, 
+  BTHOME_VOLUME_STORAGE_VALUE = 0x55, 
+  BTHOME_CONDUCTIVITY_VALUE = 0x56, 
+  BTHOME_DIRECTION_VALUE = 0x5e, 
+  BTHOME_PRECIPITATION_VALUE = 0x5f, 
+  BTHOME_CHANNEL_VALUE = 0x60, 
+  BTHOME_ROTATIONAL_SPEED_VALUE = 0x61, 
+  BTHOME_DEVICE_TYPE_ID_VALUE = 0xf0
 } BTHome_e;
 
 typedef enum {
@@ -92,7 +101,7 @@ typedef enum {
   BTHOME_BUTTON_TRIPLE_CLICK = 0x03, 
   BTHOME_BUTTON_LONG_CLICK = 0x04, 
   BTHOME_BUTTON_LONG_DOUBLE_CLICK = 0x05, 
-  BTHOME_BUTTON_LONG_TRIPLE_CLICK = 0x06,
+  BTHOME_BUTTON_LONG_TRIPLE_CLICK = 0x06, 
   BTHOME_BUTTON_HOLD_CLICK = 0x80
 } BTHome_Button_e;
 
@@ -111,26 +120,26 @@ static const uint8_t PROGMEM MEAS_TYPES_FLAGS[] = {
 static const uint8_t         MEAS_TYPES_FLAGS[] = {
 #endif
   /* 0x00 */ 0b00000001, /* packet_id | uint8 (1 byte) | numeric * 1.0 */
-  /* 0x01 */ 0b00000001, /* battery | uint8 (1 byte) | numeric * 1.0 */
-  /* 0x02 */ 0b01001010, /* temperature | sint16 (2 bytes) | numeric * 0.01 */
-  /* 0x03 */ 0b01000010, /* humidity | uint16 (2 bytes) | numeric * 0.01 */
-  /* 0x04 */ 0b01000011, /* pressure | uint24 (3 bytes) | numeric * 0.01 */
-  /* 0x05 */ 0b01000011, /* illuminance | uint24 (3 bytes) | numeric * 0.01 */
-  /* 0x06 */ 0b01000010, /* mass_kg | uint16 (2 byte) | numeric * 0.01 */
-  /* 0x07 */ 0b01000010, /* mass_lb | uint16 (2 byte) | numeric * 0.01 */
-  /* 0x08 */ 0b01001010, /* dewpoint | sint16 (2 bytes) | numeric * 0.01 */
-  /* 0x09 */ 0b00000001, /* count | uint (1 bytes) | numeric * 1.0 */
-  /* 0x0a */ 0b01100011, /* energy | uint24 (3 bytes) | numeric * 0.001 */
-  /* 0x0b */ 0b01000011, /* power | uint24 (3 bytes) | numeric * 0.01 */
-  /* 0x0c */ 0b01100010, /* voltage | uint16 (2 bytes) | numeric * 0.001 */
-  /* 0x0d */ 0b00000010, /* pm2_5 | uint16 (2 bytes) | numeric * 1.0 */
-  /* 0x0e */ 0b00000010, /* pm10 | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x01 */ 0b00000001, /* battery | uint8 (1 byte) | numeric * 1.0 */
+  /* 0x02 */ 0b01001010, /* temperature | sint16 (2 bytes) | numeric * 0.01 */
+  /* 0x03 */ 0b01000010, /* humidity | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x04 */ 0b01000011, /* pressure | uint24 (3 bytes) | numeric * 0.01 */
+  /* 0x05 */ 0b01000011, /* illuminance | uint24 (3 bytes) | numeric * 0.01 */
+  /* 0x06 */ 0b01000010, /* mass_kg | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x07 */ 0b01000010, /* mass_lb | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x08 */ 0b01001010, /* dewpoint | sint16 (2 bytes) | numeric * 0.01 */
+  /* 0x09 */ 0b00000001, /* count | uint8 (1 byte) | numeric * 1.0 */
+  /* 0x0a */ 0b01100011, /* energy | uint24 (3 bytes) | numeric * 0.001 */
+  /* 0x0b */ 0b01000011, /* power | uint24 (3 bytes) | numeric * 0.01 */
+  /* 0x0c */ 0b01100010, /* voltage | uint16 (2 bytes) | numeric * 0.001 */
+  /* 0x0d */ 0b00000010, /* pm2_5 | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x0e */ 0b00000010, /* pm10 | uint16 (2 bytes) | numeric * 1.0 */
   /* 0x0f */ 0b00000001, /* generic_boolean | uint8 (1 byte) | binary */
   /* 0x10 */ 0b00000001, /* power | uint8 (1 byte) | binary */
   /* 0x11 */ 0b00000001, /* opening | uint8 (1 byte) | binary */
-  /* 0x12 */ 0b00000010, /* co2 | uint16 (2 bytes) | numeric * 1.0 */
-  /* 0x13 */ 0b00000010, /* tvoc | uint16 (2 bytes) | numeric * 1.0 */
-  /* 0x14 */ 0b01000010, /* moisture | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x12 */ 0b00000010, /* co2 | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x13 */ 0b00000010, /* tvoc | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x14 */ 0b01000010, /* moisture | uint16 (2 bytes) | numeric * 0.01 */
   /* 0x15 */ 0b00000001, /* battery | uint8 (1 byte) | binary */
   /* 0x16 */ 0b00000001, /* battery_charging | uint8 (1 byte) | binary */
   /* 0x17 */ 0b00000001, /* carbon_monoxide | uint8 (1 byte) | binary */
@@ -156,8 +165,8 @@ static const uint8_t         MEAS_TYPES_FLAGS[] = {
   /* 0x2b */ 0b00000001, /* tamper | uint8 (1 byte) | binary */
   /* 0x2c */ 0b00000001, /* vibration | uint8 (1 byte) | binary */
   /* 0x2d */ 0b00000001, /* window | uint8 (1 byte) | binary */
-  /* 0x2e */ 0b00000001, /* humidity_coarse | uint8 (1 byte) | numeric * 1.0 */
-  /* 0x2f */ 0b00000001, /* moisture_coarse | uint8 (1 byte) | numeric * 1.0 */
+  /* 0x2e */ 0b00000001, /* humidity_coarse | uint8 (1 byte) | numeric * 1.0 */
+  /* 0x2f */ 0b00000001, /* moisture_coarse | uint8 (1 byte) | numeric * 1.0 */
   /* 0x30 */ 0b00000000, /* unused */
   /* 0x31 */ 0b00000000, /* unused */
   /* 0x32 */ 0b00000000, /* unused */
@@ -168,42 +177,46 @@ static const uint8_t         MEAS_TYPES_FLAGS[] = {
   /* 0x37 */ 0b00000000, /* unused */
   /* 0x38 */ 0b00000000, /* unused */
   /* 0x39 */ 0b00000000, /* unused */
-  /* 0x3a */ 0b00000001, /* button_none | uint8 (1 byte) | event */
+  /* 0x3a */ 0b00000001, /* button_none | uint8 (1 byte) | event */
   /* 0x3b */ 0b00000000, /* unused */
-  /* 0x3c */ 0b00000010, /* dimmer_none | uint8 (2 byte) | event */
-  /* 0x3d */ 0b00000010, /* count_2 | uint (2 bytes) | numeric * 1.0 */
-  /* 0x3e */ 0b00000100, /* count_4 | uint (4 bytes) | numeric * 1.0 */
-  /* 0x3f */ 0b00101010, /* rotation | sint16 (2 bytes) | numeric * 0.1 */
-  /* 0x40 */ 0b00000010, /* distance_mm | uint16 (2 bytes) | numeric * 1.0 */
-  /* 0x41 */ 0b00100010, /* distance_m | uint16 (2 bytes) | numeric * 0.1 */
-  /* 0x42 */ 0b01100011, /* duration | uint24 (3 bytes) | numeric * 0.001 */
-  /* 0x43 */ 0b01100010, /* current | uint16 (2 bytes) | numeric * 0.001 */
-  /* 0x44 */ 0b01000010, /* speed | uint16 (2 bytes) | numeric * 0.01 */
-  /* 0x45 */ 0b00101010, /* temperature_coarse | sint16 (2 bytes) | numeric * 0.1 */
-  /* 0x46 */ 0b00100001, /* uv_index | uint8 (1 byte) | numeric * 0.1 */
-  /* 0x47 */ 0b00100010, /* volume | uint16 (2 bytes) | numeric * 0.1 */
-  /* 0x48 */ 0b00000010, /* volume_mL | uint16 (2 bytes) | numeric * 1.0 */
-  /* 0x49 */ 0b01100010, /* volume_flow_rate | uint16 (2 bytes) | numeric * 0.001 */
-  /* 0x4a */ 0b00100010, /* voltage_coarse | uint16 (2 bytes) | numeric * 0.1 */
-  /* 0x4b */ 0b01100011, /* gas | uint24 (3 bytes) | numeric * 0.001 */
-  /* 0x4c */ 0b01100100, /* gas_4 | uint32 (4 bytes) | numeric * 0.001 */
-  /* 0x4d */ 0b01100100, /* energy_4 | uint32 (4 bytes) | numeric * 0.001 */
-  /* 0x4e */ 0b01100100, /* volume_precise | uint32 (4 bytes) | numeric * 0.001 */
-  /* 0x4f */ 0b01100100, /* water | uint32 (4 bytes) | numeric * 0.001 */
-  /* 0x50 */ 0b00000100, /* timestamp | uint48 (4 bytes) | numeric * 1.0 */
-  /* 0x51 */ 0b01100010, /* acceleration | uint16 (2 bytes) | numeric * 0.001 */
-  /* 0x52 */ 0b01100010, /* gyroscope | uint16 (2 bytes) | numeric * 0.001 */
-  /* 0x53 */ 0b00000000, /* text */
-  /* 0x54 */ 0b00000000, /* raw */
-  /* 0x55 */ 0b01100100, /* volume storage | uint32 (4 bytes) | numeric * 0.001 */
-  /* 0x56 */ 0b00000010, /* conductivity | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x3c */ 0b00000010, /* dimmer_none | uint8 (2 byte) | event */
+  /* 0x3d */ 0b00000010, /* count_2 | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x3e */ 0b00000100, /* count_4 | uint32 (4 bytes) | numeric * 1.0 */
+  /* 0x3f */ 0b00101010, /* rotation | sint16 (2 bytes) | numeric * 0.1 */
+  /* 0x40 */ 0b00000010, /* distance_mm | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x41 */ 0b00100010, /* distance_m | uint16 (2 bytes) | numeric * 0.1 */
+  /* 0x42 */ 0b01100011, /* duration | uint24 (3 bytes) | numeric * 0.001 */
+  /* 0x43 */ 0b01100010, /* current | uint16 (2 bytes) | numeric * 0.001 */
+  /* 0x44 */ 0b01000010, /* speed | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x45 */ 0b00101010, /* temperature_coarse | sint16 (2 bytes) | numeric * 0.1 */
+  /* 0x46 */ 0b00100001, /* uv_index | uint8 (1 byte) | numeric * 0.1 */
+  /* 0x47 */ 0b00100010, /* volume | uint16 (2 bytes) | numeric * 0.1 */
+  /* 0x48 */ 0b00000010, /* volume_mL | uint16 (2 bytes) | numeric * 1.0 */
+  /* 0x49 */ 0b01100010, /* volume_flow_rate | uint16 (2 bytes) | numeric * 0.001 */
+  /* 0x4a */ 0b00100010, /* voltage_coarse | uint16 (2 bytes) | numeric * 0.1 */
+  /* 0x4b */ 0b01100011, /* gas | uint24 (3 bytes) | numeric * 0.001 */
+  /* 0x4c */ 0b01100100, /* gas_4 | uint32 (4 bytes) | numeric * 0.001 */
+  /* 0x4d */ 0b01100100, /* energy_4 | uint32 (4 bytes) | numeric * 0.001 */
+  /* 0x4e */ 0b01100100, /* volume_precise | uint32 (4 bytes) | numeric * 0.001 */
+  /* 0x4f */ 0b01100100, /* water | uint32 (4 bytes) | numeric * 0.001 */
+  /* 0x50 */ 0b00000100, /* timestamp | uint32 (4 bytes) | numeric * 1.0 */
+  /* 0x51 */ 0b01100010, /* acceleration | uint16 (2 bytes) | numeric * 0.001 */
+  /* 0x52 */ 0b01100010, /* gyroscope | uint16 (2 bytes) | numeric * 0.001 */
+  /* 0x53 */ 0b00000001, /* text */
+  /* 0x54 */ 0b00000001, /* raw */
+  /* 0x55 */ 0b01100100, /* volume_storage | uint32 (4 bytes) | numeric * 0.001 */
+  /* 0x56 */ 0b00000010, /* conductivity | uint16 (2 bytes) | numeric * 1.0 */
   /* 0x57 */ 0b00001001, /* temperature | sint8 (1 byte) | numeric 1.0 */
-  /* 0x58 */ 0b00001001, /* temperature | sint8 (1 btes) | numeric * 0.35 !!!!! */
+  /* 0x58 */ 0b00001001, /* temperature | sint8 (1 bytes) | numeric * 0.35 !!!!! */
   /* 0x59 */ 0b00001001, /* count | sint8 (1 byte) | numeric 1.0 */
   /* 0x5a */ 0b00001010, /* count | sint16 (2 bytes) | numeric 1.0 */
-  /* 0x5b */ 0b00001100, /* count | sint32 (4 bytes) | numeric * 1.0 */
-  /* 0x5c */ 0b01001100, /* power | sint32 (4 bytes) | numeric * 0.01 */
-  /* 0x5d */ 0b01101010, /* current |  sint16 (2 bytes) | numeric * 0.001 */
+  /* 0x5b */ 0b00001100, /* count | sint32 (4 bytes) | numeric * 1.0 */
+  /* 0x5c */ 0b01001100, /* power | sint32 (4 bytes) | numeric * 0.01 */
+  /* 0x5d */ 0b01101010, /* current | sint16 (2 bytes) | numeric * 0.001 */
+  /* 0x5e */ 0b01000010, /* direction | uint16 (2 bytes) | numeric * 0.01 */
+  /* 0x5f */ 0b00100010, /* precipitation | uint16 (2 bytes) | numeric * 0.1 */
+  /* 0x60 */ 0b00000001, /* channel | uint8 (1 byte) | numeric * 1.0 */
+  /* 0x61 */ 0b00000010, /* rotational_speed | uint16 (2 bytes) | numeric * 1.0 */
 };
 
 }

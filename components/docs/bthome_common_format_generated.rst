@@ -8,7 +8,7 @@ Object id                      Property                       Length (byte)     
 0x02                           temperature                    2                              2                              °C                             numeric                       
 0x03                           humidity                       2                              2                              %                              numeric                       
 0x04                           pressure                       3                              2                              hPa                            numeric                       
-0x05                           illuminance                    3                              2                              lux                            numeric                       
+0x05                           illuminance                    3                              2                              lx                             numeric                       
 0x06                           mass_kg                        2                              2                              kg                             numeric                       
 0x07                           mass_lb                        2                              2                              lb                             numeric                       
 0x08                           dewpoint                       2                              2                              °C                             numeric                       
@@ -58,6 +58,7 @@ Object id                      Property                       Length (byte)     
 0x3a                           button_long_click              1                                                                                            event                         
 0x3a                           button_long_double_click       1                                                                                            event                         
 0x3a                           button_long_triple_click       1                                                                                            event                         
+0x3a                           button_hold_click              1                                                                                            event                         
 0x3c                           dimmer_none                    2                                                                                            event                         
 0x3c                           dimmer_rotate_left             2                                                             steps                          event                         
 0x3c                           dimmer_rotate_right            2                                                             steps                          event                         
@@ -83,4 +84,14 @@ Object id                      Property                       Length (byte)     
 0x50                           timestamp                      4                                                                                            numeric                       
 0x51                           acceleration                   2                              3                              m/s²                           numeric                       
 0x52                           gyroscope                      2                              3                              °/s                            numeric                       
+0x53                           text                           1                                                                                            numeric                       
+0x54                           raw                            1                                                                                            numeric                       
+0x55                           volume_storage                 4                              3                              L                              numeric                       
+0x56                           conductivity                   2                                                             µS/cm                          numeric                       
+0x5d                           current                        2                              3                              A                              numeric
+0x5e                           direction                      2                              2                              °                              numeric                       
+0x5f                           precipitation                  2                              1                              mm                             numeric                       
+0x60                           channel                        1                                                                                            numeric                       
+0x61                           rotational_speed               2                                                             rpm                            numeric                       
+0xf0                           device_type_id                 2                                                                                            numeric                       
 ============================== ============================== ============================== ============================== ============================== ==============================
