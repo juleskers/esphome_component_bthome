@@ -145,12 +145,6 @@ for imain, main_type in enumerate(main_types):
                 pass
             try:
                 unit_of_measurement = row[6]
-
-                # spec bug: Spec lists "lux" unit, but proper SI symbol as expected by Home Assistant is "lx".
-                # spec-fix proposed in https://github.com/home-assistant/bthome.io/pull/66
-                # until then:
-                if unit_of_measurement == "lux":
-                    unit_of_measurement = "lx"
             except:
                 pass
         accuracy_decimals = int(abs(math.log10(factor)))
