@@ -17,6 +17,7 @@ import helpers
 
 ignore_list = [
     0x53, 0x54,  # "text", "raw"; we can't handle these yet, because they're variable-length.
+    0xf0,        # "device type id"; since this is numbered from the end, including it blows up our lookup tables;
 ]
 
 
