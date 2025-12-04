@@ -65,14 +65,17 @@ main_types = [  # Column headers:
     "event",    # Object id; Device type; Event id; Event type; Event property; Example; Result
 
     # Spec header "Device information"; append to numeric
-    "numeric",  # Object id; Property; Data Type
+    "numeric",  # Object id; Property; Data Type; Example, Result
 
     # Spec header "Misc data"; append to numeric
     # only "packet id" at time of writing
     "numeric",  # Object id; Property; Data Type; Example; Result
 ]
 
+# Our big data accumulator for everyting we parse from the website
 data = []
+
+
 for imain, main_type in enumerate(main_types):
     if not main_type:  # set entry in main_types to `None` to skip a table
         continue
@@ -188,6 +191,9 @@ for imain, main_type in enumerate(main_types):
         lastrow = row
 
 # print(list(data[0].values())[0])
+# Sort; website tables are sorted by property-name, alphabetically,
+# but we want to have our generated tables+code follow object-id order
+# (so object-id == array offset)
 data = sorted(data, key=lambda x: helpers.msb(x["measurement_type"]))
 
 #
@@ -195,13 +201,11 @@ data = sorted(data, key=lambda x: helpers.msb(x["measurement_type"]))
 # to ensure non-ambiguous keys for config files.
 #
 
-differentiator_dictionary = {
+differentiators = {
     "unit_of_measurement": None,
     "accuracy_decimals": {-1: "coarse", 0: "None", +1: "precise"},
     "data_type_length": [0, 1, 2, 3, 4],
 }
-differentiator_candidates = differentiator_dictionary.keys()
-
 for index, item in enumerate(data):
     property_key = item["property"]
     main_type_key = item["main_type"]
@@ -209,7 +213,7 @@ for index, item in enumerate(data):
     # find all alike item indexes
     alike_list = [
         item
-        for (_, item) in enumerate(data)
+        for item in data
         if item["property_unique"] == property_key
         and item["main_type"] == main_type_key
     ]
@@ -227,13 +231,12 @@ for index, item in enumerate(data):
         # rename all based on data_type_length
         # first - find dimensions in which they differ
         value_matrix = []
-        differentiator_matrix = [[]
-                                 for _ in range(len(differentiator_candidates))]
+        differentiator_matrix = [[] for _ in range(len(differentiators))]
         for index, item in enumerate(alike_list):
             value_row = [item[candidate]
-                         for candidate in differentiator_candidates]
+                         for candidate in (differentiators.keys())]
             value_matrix.append(value_row)
-            for cindex, candidate in enumerate(differentiator_candidates):
+            for cindex, candidate in enumerate(differentiators.keys()):
                 differentiator_matrix[cindex].append(item[candidate])
         for cindex, crow in enumerate(differentiator_matrix):
             if len(set(crow)) == 1:
@@ -243,13 +246,10 @@ for index, item in enumerate(data):
 
         def append_diff(item):
             global base_accuracy_at
-            # prop_value = item['property']
-            meas_value = item["measurement_type"]
-            # print(f"  == {item['measurement_type_hex16']}")
             retval = ""
 
             for cindex, crow in enumerate(differentiator_matrix):
-                differentiator = list(differentiator_candidates)[cindex]
+                differentiator = list(differentiators.keys())[cindex]
 
                 # if all items were the same, skip it
                 if len(crow) == 0:
@@ -304,8 +304,8 @@ for index, item in enumerate(data):
                 #     continue
 
                 # get the differentiator value and apply - either from a list or the value itself
-                if type(differentiator_dictionary[differentiator]) is list:
-                    suffix = differentiator_dictionary[differentiator][
+                if type(differentiators[differentiator]) is list:
+                    suffix = differentiators[differentiator][
                         int(item[differentiator])
                     ]
                 elif (
