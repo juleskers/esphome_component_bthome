@@ -14,6 +14,12 @@ from collections import OrderedDict
 
 import helpers
 
+
+ignore_list = [
+    0x53, 0x54,  # "text", "raw"; we can't handle these yet, because they're variable-length.
+]
+
+
 # import sys
 # sys.path.append("../components")
 # import bthome_base.const_generated
@@ -175,7 +181,8 @@ for imain, main_type in enumerate(main_types):
             # "icon": helpers.find_matching_icon(object_id, property, main_type)
         })
 
-        data.append(sensor_data)
+        if object_id not in ignore_list:
+            data.append(sensor_data)
 
         lastrow = row
 
