@@ -61,9 +61,9 @@ namespace bthome_base
                             measurement_cb_fn_t measurement_cb, log_cb_fn_t log_cb)
   {
     uint8_t next_obj_start = 0;         // pointer inside data array
-    uint8_t prev_obj_meas_type = 0;     // Keep track of measurement types, to verify that ascending order is maintained; as per spec
+    uint8_t prev_obj_meas_type = 255;   // Keep track of measurement types, to verify that ascending order is maintained; as per spec
     uint8_t obj_meas_type;              // Measurement Type; what is the sensor value representing?
-    uint8_t obj_meas_type_index = 1;    // for repeated occurrences of the same measurement type: which repeat is this?
+    uint8_t obj_meas_type_offset = 0;   // for multiple occurrences of the same measurement type (e.g. multiple buttons): which one is this?
     uint8_t obj_control_byte;           // deprecated: used in deprecated BTHomeV1 protocol;
     uint8_t obj_data_length;            // How many bytes to consume for this measurement type?
     HaBleTypes_e obj_data_format;       // How to interpret the data-bytes? (uint? sint? 8, 16, 32 bits?)
@@ -105,6 +105,15 @@ namespace bthome_base
       {
         // BTHome V2
         obj_meas_type = payload_data[obj_start];
+        if (prev_obj_meas_type == obj_meas_type)
+        {
+          // repeated instance of same measurement type; increment index/offset
+          obj_meas_type_offset += 1;
+        } else {
+          // non-repeat; restart offset for next measurement type.
+          obj_meas_type_offset = 0;
+        }
+
         if (prev_obj_meas_type > obj_meas_type)
         {
           if (log_cb)
@@ -181,7 +190,7 @@ namespace bthome_base
 
       // report measurement
       if (measurement_cb)
-        measurement_cb(obj_meas_type, value);
+        measurement_cb(obj_meas_type, obj_meas_type_offset, value);
     }
 
     return true;

@@ -19,6 +19,7 @@ namespace bthome_base
     typedef struct __attribute__((packed))
     {
         bthome_measurement_t id;
+        uint8_t offset;
 
         float value;
     } bthome_measurement_value_record_t;
@@ -26,6 +27,7 @@ namespace bthome_base
     typedef struct __attribute__((packed))
     {
         bthome_measurement_t device_type;
+        uint8_t offset;
 
         uint8_t event_type;
         uint8_t steps;
@@ -34,6 +36,7 @@ namespace bthome_base
     typedef struct
     {
         bool is_value;   // Discriminant for 'd'
+
         union
         {
             // both value and event structs start with this ID, so give unambiguous way to access it.
