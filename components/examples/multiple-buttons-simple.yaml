@@ -1,0 +1,133 @@
+#
+# EXAMPLE: how to distinguish multiple buttons on the same sending device
+#
+# A single device can send multiple copies of the same measurement ID.
+# For example: a single remote with multiple buttons.
+# (This isn't limited to 0x3A button events, nothing stops you from sending multiple temperatures in one packet.
+#  .. or humidity readings, velocities, etc.)
+#
+# This example is a simplified example to show how to access event offsets.
+
+substitutions:
+  device_name: "Multibutton Example - Simple"
+  # Bluetooth MAC address of sending button device.
+  # In this example, a Shelly BLU RC Button 4
+  # Docs: https://shelly-api-docs.shelly.cloud/docs-ble/Devices/wall_us
+  button_mac: 11:22:33:44:55:66
+
+
+esphome:
+  name: multibutton_example_simple
+
+# The BLE receiver, onto which we flash this config
+# (We don't need to flash the remote, since it already sends BThome packets)
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Tell ESPhome builder where to find this component.
+external_components:
+  - source: github://juleskers/esphome_component_bthome
+    refresh: 1 day
+    ref: master
+    #If you wish to check out a different branch
+    #ref: multibutton
+
+#  If you have this repository locally cloned:
+#  - source:
+#    type: local
+#    path: ../esphome_component_bthome/components
+
+
+# Enable webserver for debug access
+web_server:
+  include_internal: true
+
+
+# Activate the 'basic' ESP bluetooth stack, which we need to listen.
+esp32_ble_tracker:
+  scan_parameters:
+    active: false # only passively listen, which is sufficient for bthome
+
+# The BThome-specific logic, provided by this repo.
+# Parses messages received by the basic tracker stack.
+bthome_ble_receiver:
+  # When you're getting started, and don't know your remote's MAC yet,
+  # Uncomment this so that ALL received packets are logged.
+  # This will help you identify which ones come from your remote.
+  # Warning: this can get VERY noisy, since a LOT more devices emit Bluetooth advertisements than you may think.
+  # (e.g. smart televisions, temperature/humidity sensors, wireless headphones, mobile phones, etc.)
+  #dump: unmatched
+
+  # BThome "event" types are handled in the "devices" section, directly in the tracker platform.
+  # Events don't map cleanly to the sensor-model ESPhome uses for most things,
+  # so there is nowhere else to put them.
+  devices:
+    # Each devices-section limits logic to one origin MAC address.
+    - mac_address: ${button_mac}
+      name_prefix: Shelly BLU RC Button 4
+      # Debug dump all packets for this remote; to show any/all measurement records in the packet.
+      # This shows a raw, un-interpreted view of the BT-home payload.
+      #    23:00:20	[D]	[bthome_receiver_base:147]	rec BT payload is: 00 fa 01 64 3a 00 3a 00 3a 00 3a 01
+      #    23:00:20	[D]	[bthome_receiver_base:059]	Data received from 94:b2:16:28:f7:40 Shelly BLU RC Button 4
+      #    23:00:20	[D]	[bthome_receiver_base:065]	 - measure_type: 0x00[0] = value: 250.000
+      #    23:00:20	[D]	[bthome_receiver_base:065]	 - measure_type: 0x01[0] = value: 100.000
+      #    23:00:20	[D]	[bthome_receiver_base:069]	 - event_type: 0x3a[0] = event_type 0, value: 0
+      #    23:00:20	[D]	[bthome_receiver_base:069]	 - event_type: 0x3a[1] = event_type 0, value: 0
+      #    23:00:20	[D]	[bthome_receiver_base:069]	 - event_type: 0x3a[2] = event_type 0, value: 0
+      #    23:00:20	[D]	[bthome_receiver_base:069]	 - event_type: 0x3a[3] = event_type 1, value: 0
+      dump: all
+
+      # When we receive a 0x3A button single-click event
+      # (from *any* button on this remote, since we don't filter on the offset value)
+      on_button_click:
+        logger.log:
+          # Emit the parsed event as log message
+          tag: "parsed_event"
+          format: "event received type=0x%x[%d] event=%d steps=%d)"
+          # The event-handler receives a struct named 'event', of type `bthome_measurement_event_record_t`.
+          # the `args` use the same field-names as the C-struct.
+          # See definition in `bthome_base_common.h`.
+          #   - device_type: The bthome measurement_type, in this case 0x3a for "button event",
+          #                  since we're in a 'button_click' handler.
+          #   - offset: 0-based counter, incrementing by +1 for each repeated measurement_type entry in the packet.
+          #             Since this remote has four buttons, we'll see 0,1,2,3
+          #             Resets to 0 for each distinct measurement type.
+          #   - event_type: what did the button do? single click? double click? hold? etc.
+          #     Since we're in single-click handler, will be 1
+          #   - steps: not used by buttons, only by dimmer events, so 0;
+          # Example output (hitting button 4):
+          # 23:00:20 [D] [parsed_event:383] event received type=0x3a[3] event=1 steps=0)
+          args: [ event.device_type, event.offset, event.event_type, event.steps ]
+
+
+sensor:
+  # Non-event entries from the remote's payload get handled as sensors
+  # The remote spam-repeats packets to aid in reception; so filters are applied to prevent excessive updates.
+  - platform: bthome_ble_receiver
+    mac_address: ${button_mac}
+    sensors:
+      # 0x00 Packet ID
+      - measurement_type: packet_id
+        name: Latest packet id
+        filters:
+          # Filter: # Only update when value actually changes
+          # Repeated transmissions can be recognised from this packet ID.
+          # Per the BThome specification, the ID only changes when sent data changes,
+          # e.g. button_down, button_hold, button_up would yield 3 packet IDs,
+          # with each distinct packet repeated dozens of times.
+          # We intentionally expose each receive-event of duplicated packets, because one might wish to do something
+          # as long as a button is held (e.g. event_type 0x80 hold_press).
+          # The packet ID remains constant as long as the button is held (and no other buttons are pressed/released)
+          # NOTE: You probably don't want to mindlessly do actions on *each* packet, since the re-transmissions
+          # are only milliseconds apart. Some throttling is advised.
+          - delta: 1.0
+      # 0x01 Battery percentage
+      - measurement_type: battery
+        name: Shelly remote battery
+        filters:
+          # Battery won't change in the span of a few button presses,
+          # so only lazily send the final value after a (series of?) dimming presses have been processed.
+          # We wait long enough that we can expect the user to have put the remote back down.
+          - debounce: 30s
