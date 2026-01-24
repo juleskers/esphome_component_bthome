@@ -454,33 +454,6 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "unit_of_measurement": "µS/cm",
         "device_class": "conductivity"
     },
-    "temperature": {
-        "measurement_type": 0x58,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": "°C",
-        "device_class": "temperature"
-    },
-    "count": {
-        "measurement_type": 0x59,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "count": {
-        "measurement_type": 0x5a,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "count": {
-        "measurement_type": 0x5b,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "power": {
-        "measurement_type": 0x5c,
-        "accuracy_decimals": 2,
-        "unit_of_measurement": "W",
-        "device_class": "power"
-    },
     "direction": {
         "measurement_type": 0x5e,
         "accuracy_decimals": 2,
@@ -501,9 +474,5 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "measurement_type": 0x61,
         "accuracy_decimals": 0,
         "unit_of_measurement": "rpm"
-    },
-    "device_type_id": {
-        "measurement_type": 0xf0,
-        "accuracy_decimals": 0
     }
 }
