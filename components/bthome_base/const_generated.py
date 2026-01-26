@@ -442,54 +442,37 @@ MEASUREMENT_TYPES_NUMERIC_SENSOR = {
         "accuracy_decimals": 3,
         "unit_of_measurement": "°/s"
     },
-    "volume storage": {
+    "volume_storage": {
         "measurement_type": 0x55,
         "accuracy_decimals": 3,
-        "unit_of_measurement": "l",
+        "unit_of_measurement": "L",
         "device_class": "volume"
     },
     "conductivity": {
         "measurement_type": 0x56,
         "accuracy_decimals": 0,
-        "unit_of_measurement": "µS/cm"
+        "unit_of_measurement": "µS/cm",
+        "device_class": "conductivity"
     },
-    "temperature": {
-        "measurement_type": 0x57,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": "°C",
-        "device_class": "temperature"
-    },
-    "temperature": {
-        "measurement_type": 0x58,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": "°C",
-        "device_class": "temperature"
-    },
-    "count": {
-        "measurement_type": 0x59,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "count": {
-        "measurement_type": 0x5a,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "count": {
-        "measurement_type": 0x5b,
-        "accuracy_decimals": 0,
-        "unit_of_measurement": ""
-    },
-    "power": {
-        "measurement_type": 0x5c,
+    "direction": {
+        "measurement_type": 0x5e,
         "accuracy_decimals": 2,
-        "unit_of_measurement": "W",
-        "device_class": "power"
+        "unit_of_measurement": "°"
     },
-    "current": {
-        "measurement_type": 0x5d,
-        "accuracy_decimals": 3,
-        "unit_of_measurement": "A",
-        "device_class": "current"
+    "precipitation": {
+        "measurement_type": 0x5f,
+        "accuracy_decimals": 1,
+        "unit_of_measurement": "mm",
+        "device_class": "precipitation"
+    },
+    "channel": {
+        "measurement_type": 0x60,
+        "accuracy_decimals": 0,
+        "unit_of_measurement": ""
+    },
+    "rotational_speed": {
+        "measurement_type": 0x61,
+        "accuracy_decimals": 0,
+        "unit_of_measurement": "rpm"
     }
 }
