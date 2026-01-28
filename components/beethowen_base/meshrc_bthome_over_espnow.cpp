@@ -148,58 +148,37 @@ namespace beethowen_base
 		sending = false;
 		duration = micros() - sendTime;
 	}; // NOTE: ; is important to keep for ESP8266 lambda function type
+
 // replace the ESP32 recv handler signature:
 #if defined(USE_ESP32)
-void recvHandler(const esp_now_recv_info *info, const uint8_t *data, int size)
+	void recvHandler(const esp_now_recv_info *info, const uint8_t *data, int size)
 #elif defined(USE_ESP8266)
-esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size)
+	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size)
 #endif
-{
+	{
 #if defined(USE_ESP32)
-    // extract src MAC from info
-    const uint8_t *addr = info ? info->src_addr : nullptr;
+		// extract src MAC from info
+		const uint8_t *addr = info ? info->src_addr : nullptr;
 #endif
+		// Only receives from master if set
+		if (addr == NULL || master == NULL || memcmp(addr, master, 6) == 0)
+		{
+			received++;
+			sender = (uint8_t *)addr;
 
-    // Only receives from master if set
-    if (addr == NULL || master == NULL || memcmp(addr, master, 6) == 0) {
-        received++;
-        sender = (uint8_t *)addr;
-
-        BeethowenCommand_e command = get_beethowen_command(data, size);
-        if (command != BeethowenCommand_None) {
-            for (auto i = 0; i < events_num; i++)
-                if (events[i]) events[i](command, data, size);
-        } else {
-            ignored++;
-        }
-    }
-};
-
-// #if defined(USE_ESP32)
-// 	void recvHandler(const uint8_t *addr, const uint8_t *data, int size)
-// #elif defined(USE_ESP8266)
-// 	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size)
-// #endif
-// 	{
-// 		// Only receives from master if set
-// 		if (addr == NULL || master == NULL || memcmp(addr, master, 6) == 0)
-// 		{
-// 			received++;
-// 			sender = (uint8_t *)addr;
-
-// 			BeethowenCommand_e command = get_beethowen_command(data, size);
-// 			if (command != BeethowenCommand_None)
-// 			{
-// 				for (auto i = 0; i < events_num; i++)
-// 					if (events[i])
-// 						events[i](command, data, size);
-// 			}
-// 			else
-// 			{
-// 				ignored++;
-// 			}
-// 		}
-// 	}; // NOTE: ; is important to keep for ESP8266 lambda function type
+			BeethowenCommand_e command = get_beethowen_command(data, size);
+			if (command != BeethowenCommand_None)
+			{
+				for (auto i = 0; i < events_num; i++)
+					if (events[i])
+						events[i](command, data, size);
+			}
+			else
+			{
+				ignored++;
+			}
+		}
+	}; // NOTE: ; is important to keep for ESP8266 lambda function type
 
 	void end()
 	{
