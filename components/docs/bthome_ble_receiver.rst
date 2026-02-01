@@ -6,7 +6,12 @@ broadcast their sensor data and  button presses. Devices can run over a year on 
 It allows data encryption and is supported by popular home automation platforms, 
 like `Home Assistant <https://www.home-assistant.io>`__, out of the box.
 
-This component implements local reception and decoding without the need of a central hub.
+For more information, including the full protocol specification and all supported sensor types, visit
+`BTHome.io <https://bthome.io>`__
+
+This component implements local reception and decoding without the need of a central hub, instead parsing
+the packets directly on the ESP microcontroller.
+
 
 Note: as for now this component is limited to V1 and V2 unencryted formats.
 Encryption support might be implemented later on.
@@ -16,9 +21,12 @@ Encryption support might be implemented later on.
     # Example configuration entry
     external_components:
       - source: github://juleskers/esphome_component_bthome
-    
+
+    # The basic ESP Bluetooth low-energy stack, needed to receive BLE packets at all.
     esp32_ble_tracker:
 
+    # The BThome-specific logic, provided by this repo.
+    # Parses messages received by the basic tracker stack.
     bthome_ble_receiver:
       dump: unmatched
       devices:
@@ -67,13 +75,15 @@ configuration.
 
 The bthome receiver component is an internal model that acts as a central reception 
 and dispatcher hub to which bthome virtual devices and sensors are connected to.
+Additionally, the hub is responsible for handling of BTHome events, which have no other
+clean mapping in the ESPHome world.
 
 .. _config-bthome:
 
 Configuration variables:
 ************************
 
-- **dump** (*Optional*): Decode and dumpincoming remote readings codes in the logs 
+- **dump** (*Optional*): Decode and dump incoming remote readings codes in the logs
   (at log.level=DEBUG) for any device.
   
   - **all**: Decode and dump all readings.
@@ -91,6 +101,51 @@ Configuration variables:
   - **dump** (*Optional*): Decode and dump incoming remote readings codes in the logs 
     (at log.level=DEBUG) for this device.
 
+.. _bthome-events:
+
+Events: Packets, Buttons and Dimmers
+************************************
+
+The hub may specify event handlers. As of this writing,
+the BTHome specification only supports button-click and dimmer-rotation events,
+for momentary push-buttons and twistable knobs respectively.
+Rather than a value, as for sensors, events have an `event type` (e.g. "single click", "long press", "rotate left").
+Dimmer events have an additional byte specifying how many steps the rotation was (that is, "rotate left", "5 steps").
+
+In addition to the BTHome event types, this codebase also supports an `on_packet` handler, as hook for fully
+custom packet handling.
+
+Configuration variables:
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+All Event types may be specified either at the topmost `bthome_ble_receiver` level
+(responding to *any* sender of BTHome packets), or under a specific `devices` entry (limited to events
+sent by that mac address).
+
+- **on_event**: Specifies a generic event handler, triggering for any BTHome event.
+  The handling trigger receives the sending MAC-address and the full data of the pre-parsed event,
+  as represented by the `bthome_base::bthome_measurement_event_record_t` C-struct.
+
+- **on_<event_type>**: These specific handler trigger only for one specific type of event,
+  named by the type following the `on_` prefix. For example: **on_button_click** will respond only to a
+  single-clicked button.
+
+  These typed handlers have access to the same MAC+event data as the generic `on_event` handler.
+
+  Supported `on_`-button events are: `on_button_click`, `on_button_double_click`,
+  `on_button_triple_click`, `on_button_long_click`, `on_button_long_double_click`,
+  `on_button_long_triple_click`, `on_button_hold_click` and finally `on_button_none`.
+  Furthermore, dimmer events support `on_dimmer_rotate_right`, `on_dimmer_rotate_left` and `on_dimmer_none`.
+
+- **on_packet**: Triggers whenever any valid BTHome packet is received, regardless of its contents.
+  It may even be a packet that, from a BTHome perspective is "empty". That is, containing zero sensors or events,
+  only headers.
+  This is provided as a hook-point for fully-custom packet parsing, in case the tools provided by this repository
+  do not suffice.
+
+  Packet event handlers receive the sending MAC-address and a vector of pre-parsed `bthome_measurement_record_t`,
+  which can contain a mix of value-records (`bthome_measurement_value_record_t`) and event-records
+  (`bthome_measurement_event_record_t`).
 
 .. _bthome-sensor:
 
