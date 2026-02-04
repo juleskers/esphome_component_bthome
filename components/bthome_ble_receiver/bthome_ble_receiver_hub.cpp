@@ -89,25 +89,22 @@ namespace esphome
 
         if (encryption)
         {
-          ESP_LOGD(TAG, "BTHome V2 device is using encryption.");
-
           // Check if encryption key is configured for this device
           const uint8_t *encryption_key = nullptr;
 
           if (btdevice && btdevice->has_encryption_key())
           {
             encryption_key = btdevice->get_encryption_key();
-            ESP_LOGD(TAG, "Using configured encryption key for device.");
           }
           else
           {
-            ESP_LOGW(TAG, "BTHome V2 device is using encryption but no encryption_key is configured for this device. Decryption will fail.");
+            ESP_LOGW(TAG, "Got encrypted msg but KEY NOT SET");
             return false;
           }
 
           if (!decrypt_message_payload_(message, encryption_key, address))
           {
-            ESP_LOGD(TAG, "BTHome V2 device is using encryption but failed to decrypt the payload.");
+            ESP_LOGD(TAG, "Encrypted msg failed decryption");
             return false;
           }
 
@@ -138,6 +135,7 @@ namespace esphome
     }
 
     bool BTHomeBLEReceiverHub::decrypt_message_payload_(std::vector<uint8_t> &raw, const uint8_t *bindkey, const uint64_t &address) {
+      ESP_LOGV(TAG, "attempting decryption");
       uint8_t mac_address[6] = {0};
       mac_address[0] = (uint8_t) (address >> 40);
       mac_address[1] = (uint8_t) (address >> 32);
@@ -177,7 +175,7 @@ namespace esphome
 
       int ret = mbedtls_ccm_setkey(&ctx, MBEDTLS_CIPHER_ID_AES, vector.key, vector.keysize * 8);
       if (ret) {
-        ESP_LOGVV(TAG, "decrypt_bthome_payload(): mbedtls_ccm_setkey() failed.");
+        ESP_LOGV(TAG, "decrypt: mbedtls_ccm_setkey() failed.");
         mbedtls_ccm_free(&ctx);
         return false;
       }
@@ -185,22 +183,31 @@ namespace esphome
       ret = mbedtls_ccm_auth_decrypt(&ctx, vector.datasize, vector.iv, vector.ivsize, vector.authdata, vector.authsize,
                                      vector.ciphertext, vector.plaintext, vector.tag, vector.tagsize);
       if (ret) {
-        ESP_LOGVV(TAG, "decrypt_bthome_payload(): authenticated decryption failed.");
-        ESP_LOGVV(TAG, "  Error       : %d", ret);
-        ESP_LOGVV(TAG, "  MAC address : %s", format_hex_pretty(mac_address, 6).c_str());
-        ESP_LOGVV(TAG, "       Packet : %s", format_hex_pretty(raw.data(), raw.size()).c_str());
-        ESP_LOGVV(TAG, "          Key : %s", format_hex_pretty(vector.key, vector.keysize).c_str());
-        ESP_LOGVV(TAG, "           Iv : %s", format_hex_pretty(vector.iv, vector.ivsize).c_str());
-        ESP_LOGVV(TAG, "       Cipher : %s", format_hex_pretty(vector.ciphertext, vector.datasize).c_str());
-        ESP_LOGVV(TAG, "          Tag : %s", format_hex_pretty(vector.tag, vector.tagsize).c_str());
+        ESP_LOGV(TAG, "decrypt: failed, error : %d\n"
+                       "   MAC: %s\n"
+                       "Packet: %s\n"
+                       "   Key: %s\n"
+                       "    Iv: %s\n"
+                       "Cipher: %s\n"
+                       "   Tag: %s",
+                       ret,
+                       format_hex_pretty(mac_address, 6).c_str(),
+                       format_hex_pretty(raw.data(), raw.size()).c_str(),
+                       format_hex_pretty(vector.key, vector.keysize).c_str(),
+                       format_hex_pretty(vector.iv, vector.ivsize).c_str(),
+                       format_hex_pretty(vector.ciphertext, vector.datasize).c_str(),
+                       format_hex_pretty(vector.tag, vector.tagsize).c_str()
+                       );
         mbedtls_ccm_free(&ctx);
         return false;
       }
 
       // replace encrypted payload with plaintext
       uint8_t *p = vector.plaintext;
-      for (std::vector<uint8_t>::iterator it = raw.begin() + cipher_pos; it != raw.begin() + cipher_pos + vector.datasize;
-           ++it) {
+      for (std::vector<uint8_t>::iterator it = raw.begin() + cipher_pos;
+           it != raw.begin() + cipher_pos + vector.datasize;
+           ++it)
+      {
         *it = *(p++);
       }
 
@@ -210,7 +217,8 @@ namespace esphome
       // remove tag from the end of the payload
       raw.resize(raw.size() - 8);
 
-      ESP_LOGVV(TAG, "decrypt_bthome_payload(): authenticated decryption passed.");
+      ESP_LOGV(TAG, "decrypt success");
+      // plaintext at VV, because will also be logged by normal message handler.
       ESP_LOGVV(TAG, "  Plaintext : %s", format_hex_pretty(raw.data(), raw.size()).c_str());
 
       mbedtls_ccm_free(&ctx);
