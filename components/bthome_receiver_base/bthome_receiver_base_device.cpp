@@ -4,6 +4,7 @@
  Author: Attila Farago
  */
 
+#include <cstring>
 #include "esphome/components/bthome_base/bthome_base_common.h"
 
 #include "bthome_receiver_base_device.h"
@@ -17,10 +18,27 @@ namespace esphome
     using namespace bthome_base;
     static const char *const TAG = "bthome_receiver_base.device";
 
+    void BTHomeReceiverBaseDevice::set_encryption_key(const uint8_t *key)
+    {
+      if (key != nullptr)
+      {
+        memcpy(encryption_key_, key, 16);
+        encryption_key_set_ = true;
+      }
+      else
+      {
+        encryption_key_set_ = false;
+      }
+    }
+
     void BTHomeReceiverBaseDevice::dump_config()
     {
       ESP_LOGCONFIG(TAG, "device %s at 0x%llX", this->name_prefix_.c_str(), this->address_);
       ESP_LOGCONFIG(TAG, "  dump_option %d", this->dump_option_);
+      if (encryption_key_set_)
+      {
+        ESP_LOGCONFIG(TAG, "  encryption_key: set");
+      }
       for (auto sensor : my_sensors)
       {
         ESP_LOGCONFIG(TAG, "  - connected sensor: %s", sensor->get_name().c_str());

@@ -39,6 +39,7 @@ CONF_MEASUREMENT_TYPE = "measurement_type"
 CONF_ON_PACKET = "on_packet"
 CONF_ON_EVENT = "on_event"
 CONF_ON_EVENT_PREFIX = "on_"
+CONF_ENCRYPTION_KEY = "encryption_key"
 
 CODEOWNERS = ["@afarago"]
 DEPENDENCIES = []
@@ -73,6 +74,22 @@ DUMP_OPTION = {
 _LOGGER = logging.getLogger(__name__)
 
 
+def validate_encryption_key(value):
+    """Validate encryption key - must be a 32 character hex string (16 bytes)"""
+    if isinstance(value, str):
+        # Remove spaces and colons if present
+        value = value.replace(" ", "").replace(":", "")
+        if len(value) != 32:
+            raise cv.Invalid(f"Encryption key must be exactly 32 hex characters (16 bytes), got {len(value)}")
+        try:
+            # Validate it's valid hex
+            int(value, 16)
+        except ValueError:
+            raise cv.Invalid(f"Encryption key must be a valid hex string")
+        return value
+    raise cv.Invalid(f"Encryption key must be a string")
+
+
 class ExplicitClassPtrCast(Expression):
     __slots__ = ("classop", "xhs")
 
@@ -90,12 +107,13 @@ class DeviceStorage:
     device_ = {}
     mac_address_ = {}
     name_prefix_ = {}
+    encryption_key_ = {}
 
-    def __init__(self, device_, mac_address_, name_prefix_):
+    def __init__(self, device_, mac_address_, name_prefix_, encryption_key_):
         self.device_ = device_
         self.mac_address_ = mac_address_
         self.name_prefix_ = name_prefix_
-
+        self.encryption_key_ = encryption_key_
     def get_device(self):
         return self.device_
 
@@ -104,6 +122,9 @@ class DeviceStorage:
 
     def get_name_prefix(self):
         return self.name_prefix_
+
+    def get_encryption_key(self):
+        return self.encryption_key_
 
 
 class Generator:
@@ -159,7 +180,8 @@ class Generator:
                 cv.Optional(CONF_NAME_PREFIX): cv.string,
                 cv.Optional(CONF_DUMP_OPTION): cv.enum(
                     DUMP_OPTION, upper=True, space="_"
-                )
+                ),
+                cv.Optional(CONF_ENCRYPTION_KEY): validate_encryption_key,
             }
         ).extend(self.event_schema)
 
@@ -249,7 +271,11 @@ class Generator:
                 str(config[CONF_NAME_PREFIX]
                     ) if CONF_NAME_PREFIX in config else None
             )
-            devs = DeviceStorage(var, mac_address_str, name_prefix_str)
+            encryption_key_str = (
+                str(config[CONF_ENCRYPTION_KEY]
+                    ) if CONF_ENCRYPTION_KEY in config else None
+            )
+            devs = DeviceStorage(var, mac_address_str, name_prefix_str, encryption_key_str)
             self.devices_by_addr_[mac_address_str] = devs
 
         else:
@@ -260,6 +286,16 @@ class Generator:
             cg.add(var.set_name_prefix(config[CONF_NAME_PREFIX]))
         if CONF_DUMP_OPTION in config:
             cg.add(var.set_dump_option(config[CONF_DUMP_OPTION]))
+        if CONF_ENCRYPTION_KEY in config:
+            # Convert hex string to array of bytes
+            key_str = config[CONF_ENCRYPTION_KEY].replace(" ", "").replace(":", "")
+            key_bytes = [int(key_str[i:i+2], 16) for i in range(0, 32, 2)]
+            # Create C++ static const array literal
+            key_array_literal = "{" + ", ".join([f"0x{b:02X}" for b in key_bytes]) + "}"
+            # Create a unique variable name for this encryption key
+            key_var_name = f"encryption_key_{id(config)}"
+            cg.add(RawExpression(f"static const uint8_t {key_var_name}[16] = {key_array_literal};"))
+            cg.add(var.set_encryption_key(RawExpression(key_var_name)))
 
         # event automations
         await self.to_code_automations(config, var)
