@@ -138,12 +138,6 @@ namespace esphome
     }
 
     bool BTHomeBLEReceiverHub::decrypt_message_payload_(std::vector<uint8_t> &raw, const uint8_t *bindkey, const uint64_t &address) {
-      if (!((raw.size() >= 22) && (raw.size() <= 24))) {
-        ESP_LOGVV(TAG, "decrypt_bthome_payload(): data packet has wrong size (%d)!", raw.size());
-        ESP_LOGVV(TAG, "  Packet : %s", format_hex_pretty(raw.data(), raw.size()).c_str());
-        return false;
-      }
-
       uint8_t mac_address[6] = {0};
       mac_address[0] = (uint8_t) (address >> 40);
       mac_address[1] = (uint8_t) (address >> 32);
