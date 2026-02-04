@@ -149,12 +149,17 @@ namespace beethowen_base
 		duration = micros() - sendTime;
 	}; // NOTE: ; is important to keep for ESP8266 lambda function type
 
+// Replace the ESP32 recv handler signature, depending on ESP-IDF version
+//   See https://github.com/juleskers/esphome_component_bthome/issues/4#issuecomment-3813991882
 #if defined(USE_ESP32)
-	void recvHandler(const uint8_t *addr, const uint8_t *data, int size)
+	// ESP32: use new ESP-IDF v5.1 signature, with compound esp_now_recv_info
+	void recvHandler(const esp_now_recv_info *info, const uint8_t *data, int size) {
+		// Extract src MAC from info struct.
+		const uint8_t *addr = info ? info->src_addr : nullptr;
 #elif defined(USE_ESP8266)
-	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size)
+	// ESP8266: use 'ancient' ESP-IDF v4.4 signature, just the mac address
+	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size) {
 #endif
-	{
 		// Only receives from master if set
 		if (addr == NULL || master == NULL || memcmp(addr, master, 6) == 0)
 		{

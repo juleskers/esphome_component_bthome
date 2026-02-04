@@ -62,12 +62,12 @@ namespace esphome
             device_header_reported = true;
           }
           if (measurement.is_value)
-            ESP_LOGD(TAG, " - measure_type: 0x%02x = value: %0.3f%s",
-                     measurement.d.value.id, measurement.d.value.value,
+            ESP_LOGD(TAG, " - measure_type: 0x%02x[%d] = value: %0.3f%s",
+                     measurement.d.value.id, measurement.d.value.offset, measurement.d.value.value,
                      matched ? "" : ", unmatched");
           else
-            ESP_LOGD(TAG, " - id: 0x%02x = event_type %d, value: %d",
-                     measurement.d.event.device_type, measurement.d.event.event_type, measurement.d.event.steps);
+            ESP_LOGD(TAG, " - event_type: 0x%02x[%d] = event_type %d, value: %d",
+                     measurement.d.event.device_type, measurement.d.event.offset, measurement.d.event.event_type, measurement.d.event.steps);
         }
 #endif // ESPHOME_LOG_HAS_DEBUG
       };
@@ -119,14 +119,14 @@ namespace esphome
       optional<uint8_t> packet_id = nullopt;
       bthome_base::parse_payload_bthome(
           payload_data, payload_length, proto,
-          [&](uint8_t measurement_type, float value)
+          [&](uint8_t measurement_type, uint8_t offset, float value)
           {
             switch (measurement_type)
             {
             case BTHOME_BUTTON_EVENT:
             case BTHOME_DIMMER_EVENT:
             {
-              bthome_measurement_event_record_t event_data{measurement_type, (uint8_t)((int)value & 0xff), (uint8_t)((int)value << 8 & 0xff)};
+              bthome_measurement_event_record_t event_data{measurement_type, offset, (uint8_t)((int)value & 0xff), (uint8_t)((int)value << 8 & 0xff)};
               bthome_measurement_record_t data{.is_value = false, .d = {.event = event_data}};
               measurements.push_back(data);
               break;
@@ -135,7 +135,7 @@ namespace esphome
               packet_id = value; // intentional fallthrough
             default:
             {
-              bthome_measurement_value_record_t value_data{measurement_type, value};
+              bthome_measurement_value_record_t value_data{measurement_type, offset, value};
               bthome_measurement_record_t data{.is_value = true, .d = {.value = value_data}};
               measurements.push_back(data);
             }
