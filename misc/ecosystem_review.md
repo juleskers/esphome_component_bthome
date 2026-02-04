@@ -62,9 +62,28 @@ Summarizing the kind of work that was done, and where (sometimes the same in mul
     - templateable CONF_MAC_ADDRESS
     - fixed init of bthome_measurement_record_t
 - [hostcc/master](https://github.com/hostcc/esphome_component_bthome) @ [0503da0484](https://github.com/hostcc/esphome_component_bthome/tree/0503da0484624b36bcb6af80a14b9c80cb5c26e4)
-    - same fixed init of bthome_measurement_record_t as digaus
+    - same fixed init of `bthome_measurement_record_t` as digaus
 - [ChuckMorrisGit/master](https://github.com/ChuckMorrisGit/esphome_component_bthome) @ [95e8b8e6bd](https://github.com/ChuckMorrisGit/esphome_component_bthome/tree/95e8b8e6bdbea7a17b1fab76cb241a0346f649a4)
     - esp-idf compat by removing (not-ifdef'inf) pgmspace; conflict resolved in favour of ifdef
     - additional event type: button-hold
     - many additional measurement types (small conflict in embedded non-breaking-spaces vs normal spaces, kept NBSP)
-    - same fixed init of bthome_measurement_record_t as digaus
+    - same fixed init of `bthome_measurement_record_t` as digaus
+
+### 2026-01-25
+
+- [rrooggiieerr/master](https://github.com/rrooggiieerr/esphome-bthome) @ [1397b1ad20](https://github.com/rrooggiieerr/esphome-bthome/tree/1397b1ad205589dfeff47775cf5669159f7cd7d4)
+  - Manually removed duplicated generated keys in `const_generated.py`.
+  - This is needed because `generate_bthome_constants.py` generates conflicting short-names for several newly added
+    measurement types (variants of pre-existing ones, such as `temperature` or `count`).  
+  - See [tracking issue #1](https://github.com/juleskers/esphome_component_bthome/issues/1) for more on this topic.
+- [edestecd/HEAD](https://github.com/edestecd/esphome-bthome) @ [a6078966f3](https://github.com/rrooggiieerr/esphome-bthome/tree/a6078966f3268ad9e71c7eef14c9916b9f21a206)
+  - yet another fixing the `bthome_measurement_record_t` init. Semantically same as digaus
+  - at least documents the reason: C++20 correctness
+- AFarago added funding links for himself, which I took the liberty of not copying for my clone.
+
+### 2026-02-04
+
+- [unsplorer/master](https://github.com/unsplorer/esphome-bthome) @ [55ecc6aa8843](https://github.com/unsplorer/esphome-bthome/tree/55ecc6aa884314abd1ec176f38ec8f874186a7b2)
+  - Fixed a method signature, which, due to differences in ESP-IDF API version used between ESP8266 and ESP32, wouldn't
+    compile for ESP8266 (anymore, after ESP updated IDF for *only* ESP32).
+  - See details in [#4: Understand, review and merge remote: unsplorer](https://github.com/juleskers/esphome_component_bthome/issues/4)
