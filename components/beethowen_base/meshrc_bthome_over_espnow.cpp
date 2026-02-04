@@ -153,15 +153,12 @@ namespace beethowen_base
 //   See https://github.com/juleskers/esphome_component_bthome/issues/4#issuecomment-3813991882
 #if defined(USE_ESP32)
 	// ESP32: use new ESP-IDF v5.1 signature, with compound esp_now_recv_info
-	void recvHandler(const esp_now_recv_info *info, const uint8_t *data, int size)
-#elif defined(USE_ESP8266)
-	// ESP8266: use 'ancient' ESP-IDF v4.4 signature
-	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size)
-#endif
-	{
-#if defined(USE_ESP32)
+	void recvHandler(const esp_now_recv_info *info, const uint8_t *data, int size) {
 		// Extract src MAC from info struct.
 		const uint8_t *addr = info ? info->src_addr : nullptr;
+#elif defined(USE_ESP8266)
+	// ESP8266: use 'ancient' ESP-IDF v4.4 signature, just the mac address
+	esp_now_recv_cb_t recvHandler = [](uint8_t *addr, uint8_t *data, uint8_t size) {
 #endif
 		// Only receives from master if set
 		if (addr == NULL || master == NULL || memcmp(addr, master, 6) == 0)
