@@ -76,10 +76,10 @@ namespace esphome
       else if (proto == bthome_base::BTProtoVersion_BTHomeV2)
       {
         uint8_t adv_info = payload_data[0];
-        bool encryption = bool(adv_info & (1 << 0));       // bit 0
-        bool mac_included = bool(adv_info & (1 << 1)); // bit 1
-        // bool sleepy_device = bool(adv_info & (1 << 2));    // bit 2
-        uint8_t sw_version = (adv_info >> 5) & 7; // 3 bits (5-7);
+        bool encryption = bool(adv_info & (1 << 0));        // bit 0
+        bool mac_included = bool(adv_info & (1 << 1));      // bit 1
+        // bool sleepy_device = bool(adv_info & (1 << 2));  // bit 2
+        uint8_t sw_version = (adv_info >> 5) & 7;           // 3 bits (5-7);
 
         if (proto != sw_version)
         {
@@ -87,30 +87,39 @@ namespace esphome
           return false;
         }
 
-        if (encryption)
+        // If a device key is configured, we can assume any legitimate packet will be encrypted.
+        // By checking this first, we let the user-defined configuration determine our security stance,
+        // rather than trusting the encryption-state of the received packet (which could come from anyone).
+        if (btdevice && btdevice->has_encryption_key())
         {
-          // Check if encryption key is configured for this device
-          const uint8_t *encryption_key = nullptr;
-
-          if (btdevice && btdevice->has_encryption_key())
+          if (!encryption)
           {
-            encryption_key = btdevice->get_encryption_key();
-          }
-          else
-          {
-            ESP_LOGW(TAG, "Got encrypted msg but KEY NOT SET");
+            // Prevent encryption downgrade attack: Refuse to process unencrypted messages when key is set.
+            // Log to let user know someone might be messing with them.
+            ESP_LOGW(TAG, "POTENTIAL ATTACK: Refusing unencrypted msg; encryption expected because device key set");
             return false;
           }
 
+          // attempt to decrypt (in-place) the message
+          const uint8_t *encryption_key = btdevice->get_encryption_key();
           if (!decrypt_message_payload_(message, encryption_key, address))
           {
             ESP_LOGD(TAG, "Encrypted msg failed decryption");
             return false;
           }
-
-          payload_data = message.data();
-          payload_length = message.size();
         }
+        else if (encryption)
+        {
+          // encrypted message received, but no key known for this device
+          ESP_LOGW(TAG, "Ignoring encrypted msg: Key unknown");
+          return false;
+        }
+
+        // Message is now readable
+        // - either is was unencrypted (and no encryption was required), so readable to begin with, or
+        // - it *was* encrypted, but has been successfully decrypted in-place.
+        payload_data = message.data();
+        payload_length = message.size();
 
         if (mac_included)
         {
