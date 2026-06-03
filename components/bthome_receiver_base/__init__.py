@@ -452,6 +452,25 @@ class Generator:
                         devs.get_name_prefix() + " " + config_item[CONF_NAME]
                     )
 
+                # Set default entity properties from measurement_type_record
+                if isinstance(config_item[CONF_MEASUREMENT_TYPE], dict):
+                    measurement_type_record = config_item[CONF_MEASUREMENT_TYPE]
+
+                    if (
+                        measurement_type_record.get(CONF_UNIT_OF_MEASUREMENT)
+                        and not CONF_UNIT_OF_MEASUREMENT in config_item
+                    ):
+                        config_item[CONF_UNIT_OF_MEASUREMENT] = measurement_type_record[CONF_UNIT_OF_MEASUREMENT]
+                    if (
+                        measurement_type_record.get(CONF_DEVICE_CLASS)
+                        and not CONF_DEVICE_CLASS in config_item
+                    ):
+                        config_item[CONF_DEVICE_CLASS] = measurement_type_record[CONF_DEVICE_CLASS]
+                    if (
+                        measurement_type_record.get(CONF_ICON)
+                        and not CONF_ICON in config_item
+                    ):
+                        config_item[CONF_ICON] = measurement_type_record[CONF_ICON]
                 await register_sensor_async_fn(var_item, config_item)
 
                 if isinstance(config_item[CONF_MEASUREMENT_TYPE], dict):
@@ -473,30 +492,6 @@ class Generator:
                                 measurement_type_record[CONF_ACCURACY_DECIMALS]
                             )
                         )
-                    if (
-                        measurement_type_record.get(CONF_UNIT_OF_MEASUREMENT)
-                        and not CONF_UNIT_OF_MEASUREMENT in config_item
-                    ):
-                        cg.add(
-                            var_item.set_unit_of_measurement(
-                                measurement_type_record[CONF_UNIT_OF_MEASUREMENT]
-                            )
-                        )
-                    if (
-                        measurement_type_record.get(CONF_DEVICE_CLASS)
-                        and not CONF_DEVICE_CLASS in config_item
-                    ):
-                        cg.add(
-                            var_item.set_device_class(
-                                measurement_type_record[CONF_DEVICE_CLASS]
-                            )
-                        )
-                    if (
-                        measurement_type_record.get(CONF_ICON)
-                        and not CONF_ICON in config_item
-                    ):
-                        cg.add(var_item.set_icon(
-                            measurement_type_record[CONF_ICON]))
                 else:
                     cg.add(
                         var_item.set_measurement_type(
