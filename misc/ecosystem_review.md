@@ -13,7 +13,7 @@ This document serves as documentation (and note-to-self) on how to do this.
 2. Ensure all forks are added as remotes to local clone.  
    ```shell
    for USERNAME in \
-     juleskers DanCech Kimotu MrSuicideParrot afarago digaus edestecd evlo hostcc hqsone iChenlife jerome83136 konistehrad mathgaming rrooggiieerr t0urista unsplorer \
+     juleskers DanCech laberning Kimotu MrSuicideParrot afarago digaus edestecd evlo hostcc hqsone iChenlife jerome83136 konistehrad mathgaming rrooggiieerr t0urista unsplorer \
      ; do 
        git remote add $USERNAME git@github.com:$USERNAME/esphome_component_bthome.git; 
      done;
